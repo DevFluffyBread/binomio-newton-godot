@@ -33,12 +33,13 @@ As nove perguntas são fixas. Não existe cronômetro; não há dano por contato
 - `scripts/batalha.gd`: pergunta ativa, alternativas erradas e bloqueio de respostas duplicadas.
 - `scripts/perguntas.gd`: nove perguntas com resposta, dica e explicação.
 - `scripts/interface.gd`: menu, HUD, alternativas e telas de resultado.
-- `scripts/mundo.gd`: cenário, plataformas e monstros desenhados por código.
+- `scripts/mundo.gd`: cenário, plataformas e distribuição dos monstros.
+- `scripts/monstro.gd`: sprites laterais e animações dos seis tipos de inimigos.
 - `scripts/heroi.gd`: movimento lateral, pulo, animações e recuperação de queda.
 - `scripts/visual_heroi.gd`: quadros e prévias dos três personagens com as duas armas.
 - `scripts/piramide.gd`: lógica anterior preservada, inativa na campanha.
 
-Jogadores animados dos packs Tiny Pixel Hero da CraftPix: parado, corrida, pulo, ataque, dano e morte, nas seis combinações de personagem e arma. Quadros de 42×42 pixels recortados no Godot; escala inteira, filtro nearest e colisão de corpo independente do alcance da arma. O personagem original continua no protótipo anterior. Porta original preservada. Ruínas, monstros e efeitos continuam desenhados por código. Sons sintetizados em execução. Veja `assets/herois/CREDITOS.md` para a origem e a licença da arte.
+Jogadores animados dos packs Tiny Pixel Hero da CraftPix: parado, corrida, pulo, ataque, dano e morte, nas seis combinações de personagem e arma. Quadros de 42×42 pixels recortados no Godot; escala inteira, filtro nearest e colisão de corpo independente do alcance da arma. O personagem original continua no protótipo anterior. Porta original preservada. Monstros animados dos packs Slime Mobs e Predator Plant da CraftPix substituem os desenhos provisórios. As seis variantes usam a direção esquerda, com idle, ataque, dano e morte. O chefe é uma planta maior com coroa; veja `assets/monstros/CREDITOS.md`. Ruínas e efeitos continuam desenhados por código. Sons sintetizados em execução. Veja `assets/herois/CREDITOS.md` para a origem e a licença da arte.
 
 ## Validar
 
@@ -47,10 +48,11 @@ Execute com o Godot instalado:
 ```sh
 godot --headless --path . --script res://tests/test_rpg.gd
 godot --headless --path . --script res://tests/test_herois.gd
+godot --headless --path . --script res://tests/test_monstros.gd
 ```
 
-A suíte verifica armas, respostas, bloqueio de cliques repetidos, dicas, derrota, reinício, portas, campanha completa e colisões. Os resultados esperados são `RPG_TEST_RESULT: 0 falhas` e `HERO_TEST_RESULT: 0 falhas`. A segunda suíte cobre as seis combinações, ordem da seleção, botão Voltar, animações, colisão, morte e preservação das escolhas.
+A suíte verifica armas, respostas, bloqueio de cliques repetidos, dicas, derrota, reinício, portas, campanha completa e colisões. Os resultados esperados são `RPG_TEST_RESULT: 0 falhas` e `HERO_TEST_RESULT: 0 falhas`. A suíte de monstros espera `MONSTER_TEST_RESULT: 0 falhas` e confere os nove encontros, as seis variantes, ataque, dano, morte, direção lateral e reinício. A segunda suíte cobre as seis combinações, ordem da seleção, botão Voltar, animações, colisão, morte e preservação das escolhas.
 
 ## Colaboração e créditos
 
-Use branches próprias e versione cenas, scripts, imagens, `.import` e `.uid`. Não versione o cache `.godot/`. Os novos heróis são da CraftPix e seguem a licença do fornecedor, documentada em `assets/herois/CREDITOS.md`. A autoria e licença das imagens originais do protótipo ainda precisam ser confirmadas.
+Use branches próprias e versione cenas, scripts, imagens, `.import` e `.uid`. Não versione o cache `.godot/`. Os novos heróis e monstros são da CraftPix e seguem a licença do fornecedor, documentada em `assets/herois/CREDITOS.md` e `assets/monstros/CREDITOS.md`. A autoria e licença das imagens originais do protótipo ainda precisam ser confirmadas.

@@ -1,7 +1,10 @@
 extends Node2D
 
+const Monstro = preload("res://scripts/monstro.gd")
 const PALETAS = [Color("#74d9bd"), Color("#e8b76d"), Color("#bd9cff")]
-const NOMES = [["Broto de pedra", "Sentinela", "Guardião musgoso"], ["Escaravelho", "Vigia de bronze", "Golem solar"], ["Sombra rúnica", "Espectro", "REI DO BINÔMIO"]]
+const NOMES = [["Slime de jade", "Slime rubi", "Broto faminto"], ["Slime abissal", "Mandíbula dourada", "Trepadeira sentinela"], ["Slime ancestral", "Flor sombria", "REI DO BINÔMIO"]]
+const ELENCOS = [[["Slime", 1], ["Slime", 2], ["Plant", 1]], [["Slime", 3], ["Plant", 2], ["Plant", 1]], [["Slime", 2], ["Plant", 3], ["Plant", 3]]]
+var monstros: Array[Node2D] = []
 var fase = 0
 var derrotados = 0
 var tempo = 0.0
@@ -29,6 +32,17 @@ func configurar(indice: int) -> void:
 	fase = indice
 	derrotados = 0
 	efeito = ""
+	for monstro in monstros:
+		remove_child(monstro)
+		monstro.queue_free()
+	monstros.clear()
+	for i in range(3):
+		var monstro = Node2D.new()
+		monstro.set_script(Monstro)
+		monstro.position = pontos[i]
+		add_child(monstro)
+		monstro.configurar(ELENCOS[fase][i][0], ELENCOS[fase][i][1], fase == 2 and i == 2)
+		monstros.append(monstro)
 	for filho in get_children():
 		if filho is StaticBody2D:
 			remove_child(filho)
@@ -47,9 +61,15 @@ func configurar(indice: int) -> void:
 
 func _process(delta: float) -> void:
 	tempo += delta
+	for i in range(monstros.size()):
+		if i < derrotados:
+			monstros[i].hide()
 	if is_instance_valid(porta):
 		porta.modulate = Color("#ffe3a4") if derrotados == 3 else Color("#8c9aaa")
 	queue_redraw()
+
+func animar_resposta(indice: int, acertou: bool, duracao: float) -> void:
+	monstros[indice].reagir(acertou, duracao)
 
 func texto(pos: Vector2, valor: String, tamanho: int, cor: Color) -> void:
 	draw_string(ThemeDB.fallback_font, pos, valor, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho, cor)
@@ -84,30 +104,7 @@ func _draw() -> void:
 			draw_circle(p + Vector2(0, -5), 6, acento)
 			texto(p + Vector2(-22, -45), "LIVRE", 12, acento)
 			continue
-		var chefe = fase == 2 and i == 2
-		var escala = 1.45 if chefe else (1.2 if i == 2 else 1.0)
-		var balanco = sin(tempo * 2.5 + i) * 3
-		var c = acento if i == derrotados else acento.darkened(0.4)
-		draw_ellipse_shadow(p)
-		if i == 0:
-			draw_circle(p + Vector2(0, -19 + balanco), 22, c.darkened(0.3))
-			draw_rect(Rect2(p + Vector2(-24, -20 + balanco), Vector2(48, 19)), c.darkened(0.3))
-			draw_line(p + Vector2(-12, -39 + balanco), p + Vector2(-18, -50 + balanco), c, 4)
-			draw_line(p + Vector2(12, -39 + balanco), p + Vector2(18, -50 + balanco), c, 4)
-		else:
-			draw_rect(Rect2(p + Vector2(-21, -50 * escala + balanco), Vector2(42, 48 * escala)), c.darkened(0.35))
-			draw_rect(Rect2(p + Vector2(-29, -39 * escala + balanco), Vector2(58, 15)), c.darkened(0.15))
-			draw_line(p + Vector2(-12, -2), p + Vector2(-12, -14), c, 7)
-			draw_line(p + Vector2(12, -2), p + Vector2(12, -14), c, 7)
-			if i == 2:
-				draw_line(p + Vector2(-20, -48 * escala), p + Vector2(-32, -63 * escala), c, 6)
-				draw_line(p + Vector2(20, -48 * escala), p + Vector2(32, -63 * escala), c, 6)
-				draw_colored_polygon(PackedVector2Array([p + Vector2(0, -24), p + Vector2(6, -17), p + Vector2(0, -10), p + Vector2(-6, -17)]), Color("#fff0c9"))
-			if chefe:
-				draw_colored_polygon(PackedVector2Array([p + Vector2(-22, -74), p + Vector2(-24, -92), p + Vector2(-8, -82), p + Vector2(0, -100), p + Vector2(8, -82), p + Vector2(24, -92), p + Vector2(22, -74)]), Color("#efbc66"))
-		draw_rect(Rect2(p + Vector2(-12, -28 * escala + balanco), Vector2(7, 5)), Color("#fff0c9"))
-		draw_rect(Rect2(p + Vector2(5, -28 * escala + balanco), Vector2(7, 5)), Color("#fff0c9"))
-		texto(p + Vector2(-42, -65 * escala), "0%d" % (i + 1), 13, c)
+		texto(p + Vector2(-25, -138 if fase == 2 and i == 2 else -82), "0%d" % (i + 1), 13, acento)
 	if derrotados == 3:
 		draw_rect(Rect2(1162, 536, 56, 64), Color(acento, 0.25))
 		texto(Vector2(1130, 515), "SAÍDA ABERTA", 14, acento)
@@ -129,6 +126,3 @@ func _draw() -> void:
 		else:
 			draw_line(centro, origem, Color("#ef7884"), 4)
 			draw_circle(origem, 25 + progresso * 15, Color(0.95, 0.3, 0.4, 0.3 * (1 - progresso)))
-
-func draw_ellipse_shadow(p: Vector2) -> void:
-	draw_line(p + Vector2(-25, 0), p + Vector2(25, 0), Color(0, 0, 0, 0.4), 8)

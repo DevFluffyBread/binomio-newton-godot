@@ -158,6 +158,7 @@ func _resposta(acertou: bool) -> void:
 	mundo.origem = player.position
 	mundo.progresso = 0.0
 	player.animar_acao("ataque" if acertou else ("morte" if vidas == 1 else "dano"), duracao_ataque)
+	mundo.animar_resposta(mortos, acertou, duracao_ataque)
 	tocar(acertou)
 	var tween = create_tween()
 	tween.tween_property(mundo, "progresso", 1.0, duracao_ataque)
