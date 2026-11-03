@@ -1,11 +1,8 @@
-# Pendências do trabalho
+# Próximos passos
 
-- [ ] Abrir no Godot 4 e testar movimento, pulo, geração, colisões, porta e reinício.
-- [ ] Confirmar a regra matemática: linhas = A+B ou expoente n independente.
-- [ ] Definir objetivo pedagógico e condição de vitória além de alcançar a porta.
-- [ ] Receber descrição e cenários das três fases; a primeira cena é provisória.
-- [ ] Criar fases 2 e 3 e progressão entre cenas.
-- [ ] Impedir posicionamento sobre personagem, porta, painel e fora da área útil.
-- [ ] Ajustar números que não cabem nos blocos e limite de linhas.
-- [ ] Confirmar autoria/licença das imagens e adicionar créditos.
-- [ ] Exportar e testar na máquina da apresentação.
+- [ ] Confirmar autoria/licença dos sprites e acrescentar os nomes do grupo nos créditos.
+- [ ] Substituir a arte provisória por sprites animados, se desejado.
+- [ ] Testar em outra máquina e exportar para a apresentação.
+- [ ] Revisar as perguntas com o professor e ajustar o conteúdo ao trabalho.
+
+Implementado: três fases, nove guardiões, escolha de arma, três corações por fase, dicas, reinício, portas, vitória e recuperação de quedas.

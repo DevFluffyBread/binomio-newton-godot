@@ -1,50 +1,54 @@
-# Binômio de Newton — Godot
+# As Ruínas do Binômio
 
-Base de trabalho organizada a partir dos três scripts e das duas imagens enviados pelo grupo. Projeto para Godot 4.x, com GDScript e renderizador Compatibility.
+RPG lateral educativo em Godot 4: escolha espada ou arco e derrote nove guardiões respondendo perguntas sobre o Binômio de Newton.
 
-## Abrir
+## Executar
 
-1. Abra o Godot 4 e escolha **Importar**.
-2. Selecione `project.godot` nesta pasta.
-3. Pressione **F6** na cena `scenes/fase_01.tscn` ou **F5** para executar o projeto.
+Importe `project.godot` no Godot 4.7 ou superior e pressione **F5**. A cena principal é `scenes/rpg.tscn`. A cena `fase_01.tscn` e os scripts originais continuam disponíveis como protótipo anterior.
 
-## Jogar o protótipo
+## Como jogar
 
-- A/D ou setas: movimentar.
-- Espaço, W ou seta para cima: pular.
-- Informe A e B, clique em **Gerar pirâmide** e depois clique fora do painel para posicioná-la.
-- A posição clicada corresponde ao topo; as linhas crescem para baixo.
-- Alcance a porta na plataforma para concluir. **Reiniciar fase** restaura a cena.
-- Para experimentar: A=2, B=3 e topo próximo de (850, 420). A base ficará próxima do chão e os degraus ajudam a alcançar a porta.
+- Escolha espada ou arco no menu. As armas têm as mesmas regras e efeitos visuais diferentes.
+- A/D ou setas movem; Espaço, W ou seta para cima pulam.
+- Aproxime-se do próximo monstro para abrir a pergunta, escolha uma das quatro alternativas e confirme.
+- Acertar causa golpe crítico e derrota o monstro. Leia a explicação e clique em Continuar.
+- Errar custa um coração e revela uma dica. A alternativa errada fica desabilitada.
+- Cada fase começa com três corações. Ao zerar, reinicie a mesma fase ou volte ao menu para trocar a arma.
+- Derrote os três monstros para abrir a porta. Ande até ela para mudar de fase. A terceira porta conclui a aventura.
+- Cair em um buraco retorna ao último chão seguro, sem perder vida.
 
-## Organização
+## Campanha
 
-| Caminho | Conteúdo |
-| --- | --- |
-| `assets/` | Imagens originais, sem alteração |
-| `scripts/player.gd` | Movimento e pulo |
-| `scripts/piramide.gd` | Cálculo, desenho e colisões dos blocos |
-| `scripts/fase.gd` | Interface e conclusão da fase |
-| `scenes/fase_01.tscn` | Cena conectando personagem, pirâmide, porta e chão |
-| `docs/PENDENCIAS.md` | Próximos passos para o grupo |
+| Fase | Tema | Conteúdo |
+| --- | --- | --- |
+| 1 | Ruínas de jade | A, B, expoente, coeficientes e expansão de grau 2 |
+| 2 | Templo de bronze | Coeficientes e termos de grau 3, incluindo sinal negativo |
+| 3 | Câmara violeta | Grau 4, sinais e o Rei do Binômio |
 
-## Ajustes na base recebida
+As nove perguntas são fixas. Não existe cronômetro; não há dano por contato, combate manual, inventário ou salvamento permanente. Cada chefe também é derrotado com uma resposta correta.
 
-- Separados os três scripts, cada um com seu próprio `extends`.
-- Substituída a chamada inexistente `Input.is_key_just_pressed` por tratamento de eventos de teclado sem repetição.
-- Movimento suspenso durante a edição dos campos; botão de reinício incluído.
-- Cena, colisões e configuração inicial criadas; porta elevada para um desafio inicial provisório.
-- Blocos antigos removidos ao gerar novamente; espaçamento corrigido no cálculo de centralização.
-- Limite provisório: A e B não negativos, soma de 1 a 12. O limite anterior de 30 pode exceder int64; também produz uma pirâmide maior que a tela. Não há suporte a inteiros arbitrariamente grandes nesta base.
+## Estrutura
 
-## Matemática e escopo
+- `scripts/jogo.gd`: campanha, estados, progressão e efeitos de ataque.
+- `scripts/batalha.gd`: pergunta ativa, alternativas erradas e bloqueio de respostas duplicadas.
+- `scripts/perguntas.gd`: nove perguntas com resposta, dica e explicação.
+- `scripts/interface.gd`: menu, HUD, alternativas e telas de resultado.
+- `scripts/mundo.gd`: cenário, plataformas e monstros desenhados por código.
+- `scripts/heroi.gd`: movimento lateral, pulo, arma e recuperação de queda.
+- `scripts/piramide.gd`: lógica anterior preservada, inativa na campanha.
 
-Cada linha n usa `C(n,k) × A^(n-k) × B^k`, com n começando em zero. A quantidade de linhas continua sendo A+B, conforme o código recebido. Essa quantidade é uma regra do jogo, não uma exigência do teorema binomial. Para expandir uma potência específica `(A+B)^n`, o expoente deve virar um campo independente.
+Sprites originais do personagem e da porta preservados. Margens transparentes recortadas com regiões do Sprite2D; escala inteira e filtro nearest. Ruínas, monstros, capa, armas e efeitos desenhados por código. Sons de ataque sintetizados em execução, sem dependências externas.
 
-Este é um protótipo inicial: as fases 2 e 3 e seus cenários ainda não foram fornecidos. Os números grandes podem ultrapassar a largura visual das células. Ainda é necessário validar a jogabilidade no editor e ajustar posicionamento, dificuldade e arte.
+## Validar
 
-## Trabalhar em grupo
+Execute com o Godot instalado:
 
-Cada pessoa deve clonar o repositório, abrir `project.godot` e fazer mudanças em uma branch própria. Versionar `.gd`, `.tscn`, `project.godot`, imagens e arquivos `.uid` gerados pelo Godot. A pasta `.godot/` é cache e fica ignorada.
+```sh
+godot --headless --path . --script res://tests/test_rpg.gd
+```
 
-As imagens foram fornecidas pelo grupo; autoria e licença ainda precisam ser confirmadas. Nenhuma licença de distribuição foi presumida.
+A suíte verifica armas, respostas, bloqueio de cliques repetidos, dicas, derrota, reinício, portas, campanha completa e colisões. O resultado esperado é `RPG_TEST_RESULT: 0 falhas`.
+
+## Colaboração e créditos
+
+Use branches próprias e versione cenas, scripts, imagens, `.import` e `.uid`. Não versione o cache `.godot/`. As imagens foram fornecidas pelo grupo; autoria e licença precisam ser confirmadas antes de distribuição pública. Nenhuma licença foi presumida.
