@@ -81,6 +81,7 @@ func executar() -> void:
 		verificar(jogo.fase == 1 and jogo.vidas == 3 and jogo.mortos == 0, "Reinício da mesma fase")
 		verificar(jogo.arma == arma, "Reinício preserva arma")
 		# Campanha completa pelas portas.
+		jogo.menu()
 		jogo.iniciar(arma)
 		for fase in range(3):
 			verificar(jogo.fase == fase and jogo.vidas == 3, "Vida cheia em cada fase")

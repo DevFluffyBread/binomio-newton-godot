@@ -1,5 +1,8 @@
 extends CanvasLayer
 
+const VisualHeroi = preload("res://scripts/visual_heroi.gd")
+signal personagem_escolhido(personagem: int)
+signal trocar_personagem
 signal arma_escolhida(arma: String)
 signal resposta_confirmada(indice: int)
 signal continuar
@@ -15,6 +18,7 @@ var confirmar: Button
 var feedback: Label
 var selecionada = -1
 var cor = Color("#74d9bd")
+var etapa_menu = "personagem"
 
 func estilo(fundo: Color, borda: Color, raio: int = 12) -> StyleBoxFlat:
 	var s = StyleBoxFlat.new()
@@ -72,9 +76,9 @@ func _ready() -> void:
 	controles.size = Vector2(1220, 35)
 	add_child(controles)
 
-func atualizar(fase: int, mortos: int, vidas: int, arma: String) -> void:
+func atualizar(fase: int, mortos: int, vidas: int, arma: String, personagem: int = 1) -> void:
 	cor = [Color("#74d9bd"), Color("#e8b76d"), Color("#bd9cff")][fase]
-	topo.text = "FASE %d/3  —  MONSTROS %d/3     /     %s" % [fase + 1, mortos, arma.to_upper()]
+	topo.text = "FASE %d/3  —  MONSTROS %d/3     /     %s · %s" % [fase + 1, mortos, VisualHeroi.NOMES[personagem].to_upper(), arma.to_upper()]
 	vidas_label.text = "♥ ".repeat(vidas) + "♡ ".repeat(3 - vidas)
 	objetivo.text = "Alcance a porta iluminada para continuar." if mortos == 3 else "Explore as ruínas. Aproxime-se do próximo guardião para responder."
 
@@ -107,19 +111,51 @@ func cartao(pos: Vector2, largura: float, escurecer: bool = false) -> VBoxContai
 	return coluna
 
 func menu() -> void:
-	var v = cartao(Vector2(250, 165), 780, true)
-	v.add_child(label("AS RUÍNAS DO BINÔMIO", 39, Color("#efbc66")))
-	v.add_child(label("Uma aventura de Newton", 20, Color("#74d9bd")))
-	v.add_child(label("Nove guardiões protegem a saída. Cada resposta certa é um golpe crítico. Cada erro custa um coração. Você tem três por fase.", 23))
-	v.add_child(label("ESCOLHA SUA ARMA", 17, Color("#a5b8ce")))
+	etapa_menu = "personagem"
+	var v = cartao(Vector2(150, 116), 980, true)
+	v.add_child(label("AS RUÍNAS DO BINÔMIO", 36, Color("#efbc66")))
+	v.add_child(label("01 / ESCOLHA SEU PERSONAGEM", 18, cor))
+	v.add_child(label("Três heróis. A mesma coragem para enfrentar os nove guardiões.", 20, Color("#a5b8ce")))
 	var linha = HBoxContainer.new()
 	linha.add_theme_constant_override("separation", 16)
 	v.add_child(linha)
+	for id in range(1, 4):
+		var card = PanelContainer.new()
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.add_theme_stylebox_override("panel", estilo(Color("#1d2b40"), Color("#364c61")))
+		linha.add_child(card)
+		var coluna = VBoxContainer.new()
+		card.add_child(coluna)
+		var preview = VisualHeroi.previa(id, "espada")
+		preview.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		coluna.add_child(preview)
+		var nome = label(VisualHeroi.NOMES[id], 24)
+		nome.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		coluna.add_child(nome)
+		coluna.add_child(botao("Escolher", personagem_escolhido.emit.bind(id)))
+	v.add_child(label("Depois, escolha espada ou arco. Todos os heróis têm as mesmas habilidades.\nA/D ou setas para andar • Espaço para pular • Três corações por fase", 17, Color("#a5b8ce")))
+
+func menu_armas(personagem: int) -> void:
+	etapa_menu = "arma"
+	var v = cartao(Vector2(200, 102), 880, true)
+	v.add_child(label("02 / ESCOLHA SUA ARMA", 30, Color("#efbc66")))
+	v.add_child(label("SEU HERÓI: " + VisualHeroi.NOMES[personagem].to_upper(), 18, cor))
+	var linha = HBoxContainer.new()
+	linha.add_theme_constant_override("separation", 20)
+	v.add_child(linha)
 	for arma in ["espada", "arco"]:
-		var b = botao("ESPADA  /  Corte rúnico" if arma == "espada" else "ARCO  /  Flecha de luz", func(): arma_escolhida.emit(arma))
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		linha.add_child(b)
-	v.add_child(label("As duas armas têm o mesmo poder. Escolha o seu estilo.\nAnde com A/D ou setas e pule com Espaço. Sem cronômetro.", 17, Color("#a5b8ce")))
+		var card = PanelContainer.new()
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.add_theme_stylebox_override("panel", estilo(Color("#1d2b40"), Color("#364c61")))
+		linha.add_child(card)
+		var coluna = VBoxContainer.new()
+		card.add_child(coluna)
+		var preview = VisualHeroi.previa(personagem, arma)
+		preview.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		coluna.add_child(preview)
+		coluna.add_child(botao("ESPADA / Corte rúnico" if arma == "espada" else "ARCO / Flecha de luz", arma_escolhida.emit.bind(arma)))
+	v.add_child(label("O mesmo poder, dois estilos de ataque. Responda corretamente para desferir um golpe crítico! Cada erro custa um coração.", 20, Color("#a5b8ce")))
+	v.add_child(botao("← Voltar aos personagens", func(): trocar_personagem.emit()))
 
 func pergunta(dados: Dictionary, nome: String, erradas: Array, dica: String = "") -> void:
 	var v = cartao(Vector2(150, 126), 980)
@@ -168,11 +204,11 @@ func derrota(fase: int) -> void:
 	v.add_child(label("FIM DE JOGO", 40, Color("#f48c96")))
 	v.add_child(label("Seus corações acabaram. As dicas ajudam na próxima tentativa! Reinicie a fase %d com três corações." % (fase + 1), 24))
 	v.add_child(botao("Tentar fase novamente", func(): reiniciar.emit()))
-	v.add_child(botao("Menu / trocar arma", func(): voltar_menu.emit()))
+	v.add_child(botao("Menu / trocar personagem e arma", func(): voltar_menu.emit()))
 
 func vitoria() -> void:
 	var v = cartao(Vector2(250, 160), 780, true)
 	v.add_child(label("AS RUÍNAS ESTÃO LIVRES", 36, Color("#efbc66")))
 	v.add_child(label("9 guardiões derrotados  /  3 fases concluídas", 23, cor))
 	v.add_child(label("Você dominou coeficientes, termos e expansões até o grau 4. O verdadeiro golpe crítico foi aprender com cada tentativa.", 25))
-	v.add_child(botao("Jogar novamente / escolher arma", func(): voltar_menu.emit()))
+	v.add_child(botao("Jogar novamente / escolher personagem", func(): voltar_menu.emit()))

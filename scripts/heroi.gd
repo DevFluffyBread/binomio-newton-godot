@@ -1,12 +1,49 @@
 extends CharacterBody2D
 
+const Visual = preload("res://scripts/visual_heroi.gd")
 const VELOCIDADE = 240.0
 const FORCA_PULO = -440.0
 const GRAVIDADE = 1100.0
 var pode_mover = false
 var ponto_seguro = Vector2(110, 584)
 var arma = "espada"
-@onready var sprite = $Sprite2D
+var personagem = 1
+var acao_especial = false
+var olhando_esquerda = false
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+
+func _ready() -> void:
+	sprite.animation_finished.connect(_animacao_terminou)
+	configurar(personagem, arma)
+
+func configurar(id: int, equipamento: String) -> void:
+	personagem = id
+	arma = equipamento
+	acao_especial = false
+	olhando_esquerda = false
+	sprite.sprite_frames = Visual.quadros(id, equipamento)
+	sprite.speed_scale = 1.0
+	sprite.flip_h = false
+	sprite.position = Vector2(14, -26)
+	sprite.play("parado")
+
+func animar_acao(nome: String, duracao: float) -> void:
+	acao_especial = true
+	olhando_esquerda = false
+	sprite.flip_h = false
+	sprite.position.x = 14
+	var total = sprite.sprite_frames.get_frame_count(nome)
+	var fps = sprite.sprite_frames.get_animation_speed(nome)
+	sprite.speed_scale = float(total) / (fps * maxf(duracao, 0.01))
+	sprite.stop()
+	sprite.play(nome)
+
+func _animacao_terminou() -> void:
+	if sprite.animation == "morte":
+		return
+	acao_especial = false
+	sprite.speed_scale = 1.0
+	sprite.play("parado")
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if pode_mover and event is InputEventKey and event.pressed and not event.echo:
@@ -15,9 +52,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
-	queue_redraw()
 	if not pode_mover:
 		velocity = Vector2.ZERO
+		if not acao_especial:
+			sprite.play("parado")
 		return
 	if not is_on_floor():
 		velocity.y += GRAVIDADE * delta
@@ -28,21 +66,15 @@ func _physics_process(delta: float) -> void:
 		direcao += 1.0
 	velocity.x = direcao * VELOCIDADE
 	if direcao != 0:
-		sprite.flip_h = direcao < 0
+		olhando_esquerda = direcao < 0
+	sprite.flip_h = olhando_esquerda
+	sprite.position.x = -14 if olhando_esquerda else 14
 	move_and_slide()
+	if not acao_especial:
+		sprite.play("pulo" if not is_on_floor() else ("corrida" if direcao != 0 else "parado"))
 	position.x = clampf(position.x, 28, 1252)
 	if is_on_floor() and position.y < 650:
 		ponto_seguro = position
 	if position.y > 810:
 		position = ponto_seguro
 		velocity = Vector2.ZERO
-
-func _draw() -> void:
-	draw_colored_polygon(PackedVector2Array([Vector2(-8, -7), Vector2(-14, 15), Vector2(5, 13)]), Color("#55d9cc"))
-	var lado = -1.0 if is_instance_valid(sprite) and sprite.flip_h else 1.0
-	if arma == "espada":
-		draw_line(Vector2(11 * lado, 9), Vector2(20 * lado, -14), Color("#e9f2ff"), 4)
-		draw_line(Vector2(9 * lado, 1), Vector2(20 * lado, 5), Color("#efbc66"), 3)
-	else:
-		draw_arc(Vector2(14 * lado, 0), 13, -PI / 2, PI / 2, 12, Color("#efbc66"), 3)
-		draw_line(Vector2(14 * lado, -13), Vector2(14 * lado, 13), Color("#e9f2ff"), 1)

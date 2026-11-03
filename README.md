@@ -1,6 +1,6 @@
 # As Ruínas do Binômio
 
-RPG lateral educativo em Godot 4: escolha espada ou arco e derrote nove guardiões respondendo perguntas sobre o Binômio de Newton.
+RPG lateral educativo em Godot 4: escolha um dos três heróis, equipe espada ou arco e derrote nove guardiões respondendo perguntas sobre o Binômio de Newton.
 
 ## Executar
 
@@ -8,7 +8,7 @@ Importe `project.godot` no Godot 4.7 ou superior e pressione **F5**. A cena prin
 
 ## Como jogar
 
-- Escolha espada ou arco no menu. As armas têm as mesmas regras e efeitos visuais diferentes.
+- Primeiro escolha Violeta, Prata ou Azul, com prévias animadas. Depois escolha espada ou arco. Use Voltar para trocar o personagem antes de começar. As escolhas são preservadas ao reiniciar ou mudar de fase.
 - A/D ou setas movem; Espaço, W ou seta para cima pulam.
 - Aproxime-se do próximo monstro para abrir a pergunta, escolha uma das quatro alternativas e confirme.
 - Acertar causa golpe crítico e derrota o monstro. Leia a explicação e clique em Continuar.
@@ -34,10 +34,11 @@ As nove perguntas são fixas. Não existe cronômetro; não há dano por contato
 - `scripts/perguntas.gd`: nove perguntas com resposta, dica e explicação.
 - `scripts/interface.gd`: menu, HUD, alternativas e telas de resultado.
 - `scripts/mundo.gd`: cenário, plataformas e monstros desenhados por código.
-- `scripts/heroi.gd`: movimento lateral, pulo, arma e recuperação de queda.
+- `scripts/heroi.gd`: movimento lateral, pulo, animações e recuperação de queda.
+- `scripts/visual_heroi.gd`: quadros e prévias dos três personagens com as duas armas.
 - `scripts/piramide.gd`: lógica anterior preservada, inativa na campanha.
 
-Sprites originais do personagem e da porta preservados. Margens transparentes recortadas com regiões do Sprite2D; escala inteira e filtro nearest. Ruínas, monstros, capa, armas e efeitos desenhados por código. Sons de ataque sintetizados em execução, sem dependências externas.
+Jogadores animados dos packs Tiny Pixel Hero da CraftPix: parado, corrida, pulo, ataque, dano e morte, nas seis combinações de personagem e arma. Quadros de 42×42 pixels recortados no Godot; escala inteira, filtro nearest e colisão de corpo independente do alcance da arma. O personagem original continua no protótipo anterior. Porta original preservada. Ruínas, monstros e efeitos continuam desenhados por código. Sons sintetizados em execução. Veja `assets/herois/CREDITOS.md` para a origem e a licença da arte.
 
 ## Validar
 
@@ -45,10 +46,11 @@ Execute com o Godot instalado:
 
 ```sh
 godot --headless --path . --script res://tests/test_rpg.gd
+godot --headless --path . --script res://tests/test_herois.gd
 ```
 
-A suíte verifica armas, respostas, bloqueio de cliques repetidos, dicas, derrota, reinício, portas, campanha completa e colisões. O resultado esperado é `RPG_TEST_RESULT: 0 falhas`.
+A suíte verifica armas, respostas, bloqueio de cliques repetidos, dicas, derrota, reinício, portas, campanha completa e colisões. Os resultados esperados são `RPG_TEST_RESULT: 0 falhas` e `HERO_TEST_RESULT: 0 falhas`. A segunda suíte cobre as seis combinações, ordem da seleção, botão Voltar, animações, colisão, morte e preservação das escolhas.
 
 ## Colaboração e créditos
 
-Use branches próprias e versione cenas, scripts, imagens, `.import` e `.uid`. Não versione o cache `.godot/`. As imagens foram fornecidas pelo grupo; autoria e licença precisam ser confirmadas antes de distribuição pública. Nenhuma licença foi presumida.
+Use branches próprias e versione cenas, scripts, imagens, `.import` e `.uid`. Não versione o cache `.godot/`. Os novos heróis são da CraftPix e seguem a licença do fornecedor, documentada em `assets/herois/CREDITOS.md`. A autoria e licença das imagens originais do protótipo ainda precisam ser confirmadas.

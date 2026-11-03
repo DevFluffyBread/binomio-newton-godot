@@ -6,11 +6,13 @@ const Mundo = preload("res://scripts/mundo.gd")
 const Heroi = preload("res://scripts/heroi.gd")
 const Interface = preload("res://scripts/interface.gd")
 const Batalha = preload("res://scripts/batalha.gd")
+const VisualHeroi = preload("res://scripts/visual_heroi.gd")
 var estado = Estado.MENU
 var fase = 0
 var mortos = 0
 var vidas = 3
 var arma = "espada"
+var personagem = 1
 var duracao_ataque = 0.75
 var geracao = 0
 var mundo
@@ -28,20 +30,16 @@ func _ready() -> void:
 	player = CharacterBody2D.new()
 	player.name = "Player"
 	player.set_script(Heroi)
-	var sprite = Sprite2D.new()
-	sprite.name = "Sprite2D"
-	sprite.texture = load("res://assets/personagem.png")
-	sprite.region_enabled = true
-	sprite.region_rect = Rect2(10, 16, 5, 8)
-	sprite.region_filter_clip_enabled = true
-	sprite.scale = Vector2(4, 4)
+	var sprite = AnimatedSprite2D.new()
+	sprite.name = "AnimatedSprite2D"
+	sprite.scale = Vector2(2, 2)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	# Contorno claro preserva os pixels pretos sobre o cenário escuro.
-	sprite.modulate = Color("#e2eef5")
 	player.add_child(sprite)
 	var colisao = CollisionShape2D.new()
+	colisao.name = "CollisionShape2D"
+	colisao.position = Vector2(0, -8)
 	var forma = RectangleShape2D.new()
-	forma.size = Vector2(16, 32)
+	forma.size = Vector2(20, 48)
 	colisao.shape = forma
 	player.add_child(colisao)
 	add_child(player)
@@ -53,6 +51,8 @@ func _ready() -> void:
 	ui.set_script(Interface)
 	add_child(ui)
 	ui.arma_escolhida.connect(iniciar)
+	ui.personagem_escolhido.connect(escolher_personagem)
+	ui.trocar_personagem.connect(menu)
 	ui.resposta_confirmada.connect(responder)
 	ui.continuar.connect(continuar)
 	ui.reiniciar.connect(func(): carregar_fase(fase))
@@ -73,12 +73,20 @@ func menu() -> void:
 	geracao += 1
 	batalha.bloqueada = true
 	mudar_estado(Estado.MENU)
-	ui.atualizar(fase, mortos, vidas, arma)
+	ui.atualizar(fase, mortos, vidas, arma, personagem)
 	ui.menu()
 
+func escolher_personagem(id: int) -> void:
+	if estado != Estado.MENU or not id in VisualHeroi.NOMES:
+		return
+	personagem = id
+	ui.menu_armas(personagem)
+
 func iniciar(escolha: String) -> void:
+	if estado != Estado.MENU or not escolha in ["espada", "arco"]:
+		return
 	arma = escolha
-	player.arma = arma
+	player.configurar(personagem, arma)
 	carregar_fase(0)
 
 func carregar_fase(indice: int) -> void:
@@ -91,8 +99,9 @@ func carregar_fase(indice: int) -> void:
 	player.position = Vector2(110, 584)
 	player.ponto_seguro = player.position
 	player.velocity = Vector2.ZERO
+	player.configurar(personagem, arma)
 	ui.limpar()
-	ui.atualizar(fase, mortos, vidas, arma)
+	ui.atualizar(fase, mortos, vidas, arma, personagem)
 	atualizar_barreira()
 	mudar_estado(Estado.EXPLORACAO)
 
@@ -148,6 +157,7 @@ func _resposta(acertou: bool) -> void:
 	mundo.alvo = mundo.pontos[mortos]
 	mundo.origem = player.position
 	mundo.progresso = 0.0
+	player.animar_acao("ataque" if acertou else ("morte" if vidas == 1 else "dano"), duracao_ataque)
 	tocar(acertou)
 	var tween = create_tween()
 	tween.tween_property(mundo, "progresso", 1.0, duracao_ataque)
@@ -159,12 +169,12 @@ func _resposta(acertou: bool) -> void:
 		mortos += 1
 		mundo.derrotados = mortos
 		atualizar_barreira()
-		ui.atualizar(fase, mortos, vidas, arma)
+		ui.atualizar(fase, mortos, vidas, arma, personagem)
 		mudar_estado(Estado.RESULTADO)
 		ui.resultado(batalha.pergunta.explicacao)
 	else:
 		vidas -= 1
-		ui.atualizar(fase, mortos, vidas, arma)
+		ui.atualizar(fase, mortos, vidas, arma, personagem)
 		if vidas == 0:
 			mudar_estado(Estado.DERROTA)
 			ui.derrota(fase)
