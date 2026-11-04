@@ -71,7 +71,7 @@ func _ready() -> void:
 	objetivo.position = Vector2(44, 69)
 	objetivo.size = Vector2(1100, 26)
 	add_child(objetivo)
-	var controles = label("A/D ou ← →  ANDAR     ESPAÇO  PULAR     •     Acerte para atacar. Errou? Leia a dica e tente outra vez.", 16, Color("#c6d1df"))
+	var controles = label("WASD ou SETAS  MOVER EM QUATRO DIREÇÕES     •     Acerte para atacar. Errou? Leia a dica e tente outra vez.", 16, Color("#c6d1df"))
 	controles.position = Vector2(30, 675)
 	controles.size = Vector2(1220, 35)
 	add_child(controles)
@@ -80,7 +80,7 @@ func atualizar(fase: int, mortos: int, vidas: int, arma: String, personagem: int
 	cor = [Color("#74d9bd"), Color("#e8b76d"), Color("#bd9cff")][fase]
 	topo.text = "FASE %d/3  —  MONSTROS %d/3     /     %s · %s" % [fase + 1, mortos, VisualHeroi.NOMES[personagem].to_upper(), arma.to_upper()]
 	vidas_label.text = "♥ ".repeat(vidas) + "♡ ".repeat(3 - vidas)
-	objetivo.text = "Alcance a porta iluminada para continuar." if mortos == 3 else "Explore as ruínas. Aproxime-se do próximo guardião para responder."
+	objetivo.text = "Portão de saída aberto! Siga para a direita para alcançar a próxima região." if mortos == 3 else "Explore a área liberada. Derrote seu guardião para abrir o próximo portão."
 
 func limpar() -> void:
 	if is_instance_valid(camada):
@@ -133,7 +133,7 @@ func menu() -> void:
 		nome.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		coluna.add_child(nome)
 		coluna.add_child(botao("Escolher", personagem_escolhido.emit.bind(id)))
-	v.add_child(label("Depois, escolha espada ou arco. Todos os heróis têm as mesmas habilidades.\nA/D ou setas para andar • Espaço para pular • Três corações por fase", 17, Color("#a5b8ce")))
+	v.add_child(label("Depois, escolha espada ou arco. Todos os heróis têm as mesmas habilidades.\nWASD ou setas para explorar as salas • Três corações por fase", 17, Color("#a5b8ce")))
 
 func menu_armas(personagem: int) -> void:
 	etapa_menu = "arma"
@@ -191,11 +191,13 @@ func bloquear() -> void:
 		b.disabled = true
 	confirmar.disabled = true
 	feedback.text = "O ataque foi lançado…"
+	objetivo.text = "O ataque foi lançado…"
+	painel.hide()
 
 func resultado(explicacao: String) -> void:
 	var v = cartao(Vector2(220, 160), 840)
 	v.add_child(label("GOLPE CRÍTICO!", 34, Color("#efbc66")))
-	v.add_child(label("Guardião derrotado. Caminho liberado.", 21, cor))
+	v.add_child(label("Guardião derrotado. Uma nova área foi liberada!", 21, cor))
 	v.add_child(label(explicacao, 24))
 	v.add_child(botao("Continuar exploração  →", func(): continuar.emit()))
 

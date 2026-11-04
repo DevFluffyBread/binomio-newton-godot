@@ -37,12 +37,13 @@ func _ready() -> void:
 	player.add_child(sprite)
 	var colisao = CollisionShape2D.new()
 	colisao.name = "CollisionShape2D"
-	colisao.position = Vector2(0, -8)
+	colisao.position = Vector2.ZERO
 	var forma = RectangleShape2D.new()
-	forma.size = Vector2(20, 48)
+	forma.size = Vector2(20, 12)
 	colisao.shape = forma
 	player.add_child(colisao)
-	add_child(player)
+	mundo.atores.add_child(player)
+	mundo.heroi = player
 	batalha = Node.new()
 	batalha.set_script(Batalha)
 	add_child(batalha)
@@ -60,7 +61,7 @@ func _ready() -> void:
 	som = AudioStreamPlayer.new()
 	add_child(som)
 	mundo.configurar(0)
-	player.position = Vector2(110, 584)
+	player.position = Mundo.ENTRADA
 	menu()
 
 func mudar_estado(novo: Estado) -> void:
@@ -96,8 +97,7 @@ func carregar_fase(indice: int) -> void:
 	mortos = 0
 	batalha.bloqueada = true
 	mundo.configurar(fase)
-	player.position = Vector2(110, 584)
-	player.ponto_seguro = player.position
+	player.position = Mundo.ENTRADA
 	player.velocity = Vector2.ZERO
 	player.configurar(personagem, arma)
 	ui.limpar()
@@ -106,29 +106,16 @@ func carregar_fase(indice: int) -> void:
 	mudar_estado(Estado.EXPLORACAO)
 
 func atualizar_barreira() -> void:
-	if is_instance_valid(barreira):
-		remove_child(barreira)
-		barreira.queue_free()
-	barreira = null
-	if mortos >= 3:
-		return
-	# Um guardião não pode ser pulado para evitar a pergunta.
-	barreira = StaticBody2D.new()
-	barreira.position = Vector2(mundo.pontos[mortos].x + 25, 350)
-	var c = CollisionShape2D.new()
-	var shape = RectangleShape2D.new()
-	shape.size = Vector2(10, 700)
-	c.shape = shape
-	barreira.add_child(c)
-	add_child(barreira)
+	mundo.atualizar_portoes(mortos)
+	barreira = mundo.portoes[mortos] if mortos < 3 else null
 
 func _physics_process(_delta: float) -> void:
 	if estado != Estado.EXPLORACAO:
 		return
 	if mortos < 3:
-		if player.position.x >= mundo.pontos[mortos].x - 85 and player.is_on_floor():
+		if player.position.distance_to(mundo.pontos[mortos]) <= 72:
 			iniciar_encontro()
-	elif player.position.x >= 1160 and absf(player.position.y - 573) < 65:
+	elif player.position.distance_to(Mundo.SAIDA) < 30:
 		if fase < 2:
 			carregar_fase(fase + 1)
 		else:
@@ -155,8 +142,9 @@ func _resposta(acertou: bool) -> void:
 	mundo.efeito = "acerto" if acertou else "erro"
 	mundo.arma = arma
 	mundo.alvo = mundo.pontos[mortos]
-	mundo.origem = player.position
+	mundo.origem = player.position + Vector2(0, -24)
 	mundo.progresso = 0.0
+	player.orientar(mundo.pontos[mortos])
 	player.animar_acao("ataque" if acertou else ("morte" if vidas == 1 else "dano"), duracao_ataque)
 	mundo.animar_resposta(mortos, acertou, duracao_ataque)
 	tocar(acertou)

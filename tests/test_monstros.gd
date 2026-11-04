@@ -27,7 +27,7 @@ func executar() -> void:
 			for anim in ["parado", "ataque", "dano", "morte"]:
 				verificar(monstro.sprite.sprite_frames.has_animation(anim), "Animação do monstro: " + anim)
 				var textura: AtlasTexture = monstro.sprite.sprite_frames.get_frame_texture(anim, 0)
-				verificar(textura.region == Rect2(0, 128, 64, 64), "Direção lateral esquerda correta")
+				verificar(textura.region == Rect2(0, monstro.LINHAS[monstro.direcao] * 64, 64, 64), "Direção atual recortada corretamente")
 				verificar(textura.atlas.resource_path.contains("%s%d_" % [monstro.tipo, monstro.variante]), "Variação correta")
 			var primeiro: int = monstro.sprite.frame
 			await create_timer(0.14).timeout

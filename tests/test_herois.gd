@@ -58,10 +58,10 @@ func executar() -> void:
 			await create_timer(0.22).timeout
 			verificar(sprite.frame > 0, "Animação parado avança")
 			await create_timer(0.12).timeout
-			verificar(jogo.player.is_on_floor(), "Pés apoiados no chão")
+			verificar(jogo.player.position == jogo.mundo.ENTRADA, "Posição estável sem gravidade")
 			var colisao: CollisionShape2D = jogo.player.get_node("CollisionShape2D")
 			var pe = jogo.player.position.y + colisao.position.y + colisao.shape.size.y / 2
-			verificar(absf(pe - 600) < 0.2, "Colisão alinhada à superfície")
+			verificar(colisao.shape.size == Vector2(20, 12) and colisao.position == Vector2.ZERO, "Colisão restrita aos pés")
 			jogo.iniciar_encontro()
 			jogo.responder(jogo.batalha.pergunta.correta)
 			verificar(sprite.animation == "ataque", "Acerto usa o sprite de ataque")

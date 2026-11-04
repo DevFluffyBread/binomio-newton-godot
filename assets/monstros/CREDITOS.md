@@ -7,6 +7,6 @@ Sprites fornecidos pelo usuário nos packs:
 
 Autor/distribuidor: CraftPix.net. Os arquivos originais PNG foram preservados sem alteração. Foram incluídas somente as animações Idle, Attack, Hurt e Death das três variantes de cada família, com sombra.
 
-Cada quadro mede 64×64 pixels. A terceira linha das folhas contém a direção esquerda, usada na visão lateral do jogo. Recorte, escala e animação acontecem no Godot.
+Cada quadro mede 64×64 pixels. As quatro linhas das folhas contêm frente, costas, esquerda e direita. Na exploração vista de cima, os monstros usam a direção voltada para o herói. Recorte, escala e animação acontecem no Godot.
 
 O `License.txt` de ambos os packs remete a [CraftPix — File Licenses](https://craftpix.net/file-licenses/). A arte segue a licença do fornecedor e não constitui uma biblioteca para redistribuição independente.

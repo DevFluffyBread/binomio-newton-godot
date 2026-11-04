@@ -8,9 +8,11 @@ var variante = 1
 var chefe = false
 var estado = "parado"
 var revisao = 0
+var direcao = "esquerda"
+const LINHAS = {"frente": 0, "costas": 1, "esquerda": 2, "direita": 3}
 
-static func quadros(familia: String, id: int) -> SpriteFrames:
-	var chave = "%s%d" % [familia, id]
+static func quadros(familia: String, id: int, orientacao: String = "esquerda") -> SpriteFrames:
+	var chave = "%s%d/%s" % [familia, id, orientacao]
 	if cache.has(chave):
 		return cache[chave]
 	var frames = SpriteFrames.new()
@@ -24,7 +26,7 @@ static func quadros(familia: String, id: int) -> SpriteFrames:
 			var recorte = AtlasTexture.new()
 			recorte.atlas = textura
 			# Quatro linhas: frente, costas, esquerda e direita.
-			recorte.region = Rect2(indice * 64, 128, 64, 64)
+			recorte.region = Rect2(indice * 64, LINHAS[orientacao] * 64, 64, 64)
 			recorte.filter_clip = true
 			frames.add_frame(animacao, recorte)
 	cache[chave] = frames
@@ -45,6 +47,20 @@ func configurar(familia: String, id: int, e_chefe: bool = false) -> void:
 	sprite.animation_finished.connect(_terminou)
 	sprite.play("parado")
 	queue_redraw()
+
+func orientar(alvo: Vector2) -> void:
+	if estado != "parado":
+		return
+	var vetor = alvo - position
+	var nova = ("esquerda" if vetor.x < 0 else "direita") if absf(vetor.x) >= absf(vetor.y) else ("costas" if vetor.y < 0 else "frente")
+	if nova == direcao:
+		return
+	direcao = nova
+	var quadro = sprite.frame
+	var progresso_quadro = sprite.frame_progress
+	sprite.sprite_frames = quadros(tipo, variante, direcao)
+	sprite.play("parado")
+	sprite.set_frame_and_progress(quadro, progresso_quadro)
 
 func tocar(animacao: String, duracao: float) -> void:
 	estado = animacao

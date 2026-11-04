@@ -93,32 +93,22 @@ func executar() -> void:
 				jogo.continuar()
 			verificar(jogo.mortos == 3 and jogo.mundo.derrotados == 3, "Três monstros derrotados")
 			verificar(jogo.barreira == null, "Caminho liberado")
-			jogo.player.position = Vector2(1190, 584)
+			jogo.player.position = jogo.mundo.SAIDA
 			jogo._physics_process(0.0)
 		verificar(jogo.estado == jogo.Estado.VITORIA, "Vitória após nove monstros")
 		jogo.menu()
 		verificar(jogo.estado == jogo.Estado.MENU, "Retorno ao menu")
-	# Física: chão, pouso na plataforma, recuperação após queda sem dano.
+	# Aproximar no eixo horizontal sem estar perto no mapa não inicia batalha.
 	jogo.iniciar("espada")
-	jogo.player.position = Vector2(130, 450)
-	await create_timer(0.8).timeout
-	verificar(jogo.player.is_on_floor(), "Colisão com chão")
-	verificar(absf(jogo.player.position.y + 16 - 600) < 0.2, "Pés alinhados")
-	var tecla = InputEventKey.new()
-	tecla.keycode = KEY_SPACE
-	tecla.pressed = true
-	jogo.player._unhandled_key_input(tecla)
-	verificar(jogo.player.velocity.y < 0, "Pulo no chão")
+	jogo.player.position = Vector2(300, 560)
 	await create_timer(0.12).timeout
-	verificar(jogo.player.position.y < 580, "Pulo desloca o personagem")
-	jogo.carregar_fase(0)
-	jogo.player.position = Vector2(280, 584)
+	verificar(jogo.estado == jogo.Estado.EXPLORACAO, "Encontro usa distância nos dois eixos")
+	jogo.player.position = jogo.mundo.pontos[0] + Vector2(0, 50)
 	await create_timer(0.12).timeout
-	verificar(jogo.estado == jogo.Estado.PERGUNTA, "Aproximação inicia encontro automaticamente")
+	verificar(jogo.estado == jogo.Estado.PERGUNTA, "Aproximação vertical inicia encontro")
 	var pergunta_ativa: Dictionary = jogo.batalha.pergunta
 	jogo._physics_process(0.0)
 	verificar(jogo.batalha.pergunta == pergunta_ativa, "Encontro não reinicia durante pergunta")
-	# Inspeção do layout com o texto mais longo em cada pergunta.
 	for p in jogo.perguntas:
 		jogo.ui.pergunta(p, "REI DO BINÔMIO", [], "−1 coração. DICA: " + p.dica)
 		await process_frame
@@ -128,17 +118,5 @@ func executar() -> void:
 		verificar(jogo.ui.confirmar.disabled, "Confirmação exige escolha")
 		jogo.ui.selecionar(0)
 		verificar(not jogo.ui.confirmar.disabled, "Escolha habilita confirmação")
-	jogo.ui.limpar()
-	jogo.player.position = Vector2(630, 470)
-	jogo.mudar_estado(jogo.Estado.EXPLORACAO)
-	# Evitar encontro durante o teste de pouso.
-	jogo.mortos = 3
-	await create_timer(0.8).timeout
-	verificar(jogo.player.is_on_floor(), "Pouso na plataforma elevada")
-	verificar(absf(jogo.player.position.y + 16 - 548) < 0.2, "Colisão da plataforma")
-	var vida = jogo.vidas
-	jogo.player.position = Vector2(470, 850)
-	await create_timer(0.1).timeout
-	verificar(jogo.player.position.y < 650 and jogo.vidas == vida, "Queda retorna sem perder vida")
 	print("RPG_TEST_RESULT: %d falhas" % falhas)
 	quit(0 if falhas == 0 else 1)
