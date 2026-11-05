@@ -1,6 +1,7 @@
 extends SceneTree
 
 var falhas = 0
+var jogo
 
 func _initialize() -> void:
 	call_deferred("executar")
@@ -10,9 +11,15 @@ func verificar(condicao: bool, mensagem: String) -> void:
 		falhas += 1
 		push_error(mensagem)
 
+func abrir_encontro() -> void:
+	jogo.player.position = jogo.mundo.monstros[jogo.mortos].position + Vector2(0, 60)
+	jogo.carga_critico = 3
+	jogo.iniciar_encontro()
+
 func executar() -> void:
-	var jogo = load("res://scenes/rpg.tscn").instantiate()
+	jogo = load("res://scenes/rpg.tscn").instantiate()
 	root.add_child(jogo)
+	jogo.mundo.set_physics_process(false)
 	jogo.duracao_ataque = 0.16
 	jogo.iniciar("espada")
 	var encontrados: Dictionary = {}
@@ -32,7 +39,7 @@ func executar() -> void:
 			var primeiro: int = monstro.sprite.frame
 			await create_timer(0.14).timeout
 			verificar(monstro.sprite.frame != primeiro, "Idle do monstro anima")
-			jogo.iniciar_encontro()
+			abrir_encontro()
 			var correta: int = jogo.batalha.pergunta.correta
 			jogo.responder((correta + 1) % 4)
 			verificar(monstro.sprite.animation == "ataque", "Erro faz o monstro atacar")

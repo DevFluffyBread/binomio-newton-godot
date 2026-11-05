@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+signal ataque_solicitado
+signal critico_solicitado
 const Visual = preload("res://scripts/visual_heroi.gd")
 const VELOCIDADE = 240.0
 
@@ -58,6 +60,20 @@ func vetor_entrada() -> Vector2:
 	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
 		direcao.y += 1
 	return direcao.normalized()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not pode_mover:
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_SPACE:
+			ataque_solicitado.emit()
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_E:
+			critico_solicitado.emit()
+			get_viewport().set_input_as_handled()
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		ataque_solicitado.emit()
+		get_viewport().set_input_as_handled()
 
 func mover(direcao: Vector2) -> void:
 	velocity = direcao.limit_length(1.0) * VELOCIDADE if pode_mover else Vector2.ZERO

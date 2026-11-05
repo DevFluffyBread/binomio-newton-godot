@@ -24,9 +24,15 @@ func layout() -> void:
 	var limites: Rect2 = jogo.ui.painel.get_global_rect()
 	verificar(limites.end.x <= 1280 and limites.end.y <= 670, "Seleção cabe em 1280×720")
 
+func abrir_encontro() -> void:
+	jogo.player.position = jogo.mundo.monstros[jogo.mortos].position + Vector2(0, 60)
+	jogo.carga_critico = 3
+	jogo.iniciar_encontro()
+
 func executar() -> void:
 	jogo = load("res://scenes/rpg.tscn").instantiate()
 	root.add_child(jogo)
+	jogo.mundo.set_physics_process(false)
 	jogo.duracao_ataque = 0.05
 	await process_frame
 	for id in range(1, 4):
@@ -62,13 +68,13 @@ func executar() -> void:
 			var colisao: CollisionShape2D = jogo.player.get_node("CollisionShape2D")
 			var pe = jogo.player.position.y + colisao.position.y + colisao.shape.size.y / 2
 			verificar(colisao.shape.size == Vector2(20, 12) and colisao.position == Vector2.ZERO, "Colisão restrita aos pés")
-			jogo.iniciar_encontro()
+			abrir_encontro()
 			jogo.responder(jogo.batalha.pergunta.correta)
 			verificar(sprite.animation == "ataque", "Acerto usa o sprite de ataque")
 			await create_timer(0.1).timeout
 			verificar(jogo.mortos == 1, "Ataque conclui a batalha")
 			jogo.continuar()
-			jogo.iniciar_encontro()
+			abrir_encontro()
 			var correta: int = jogo.batalha.pergunta.correta
 			var erros = 0
 			for i in range(4):

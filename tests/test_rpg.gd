@@ -32,9 +32,15 @@ func expansao(b: int, n: int) -> Array[int]:
 		coeficientes = proxima
 	return coeficientes
 
+func abrir_encontro() -> void:
+	jogo.player.position = jogo.mundo.monstros[jogo.mortos].position + Vector2(0, 60)
+	jogo.carga_critico = 3
+	jogo.iniciar_encontro()
+
 func executar() -> void:
 	jogo = load("res://scenes/rpg.tscn").instantiate()
 	root.add_child(jogo)
+	jogo.mundo.set_physics_process(false)
 	jogo.duracao_ataque = 0.01
 	await process_frame
 	verificar(jogo.estado == jogo.Estado.MENU, "Menu inicial")
@@ -50,7 +56,7 @@ func executar() -> void:
 	for arma in ["espada", "arco"]:
 		jogo.iniciar(arma)
 		verificar(jogo.player.arma == arma, "Arma escolhida")
-		jogo.iniciar_encontro()
+		abrir_encontro()
 		verificar(not jogo.player.pode_mover, "Movimento bloqueado")
 		var pergunta_original: Dictionary = jogo.batalha.pergunta
 		var incorreta = (pergunta_original.correta + 1) % 4
@@ -73,7 +79,7 @@ func executar() -> void:
 		verificar(jogo.player.pode_mover, "Exploração retomada")
 		# Três erros diferentes encerram a fase, mantendo as vitórias anteriores.
 		jogo.carregar_fase(1)
-		jogo.iniciar_encontro()
+		abrir_encontro()
 		for opcao in range(4):
 			if opcao != jogo.batalha.pergunta.correta:
 				jogo.responder(opcao)
@@ -89,7 +95,7 @@ func executar() -> void:
 			verificar(jogo.fase == fase and jogo.vidas == 3, "Vida cheia em cada fase")
 			verificar(is_instance_valid(jogo.barreira), "Porta/progresso bloqueados por guardião")
 			for monstro in range(3):
-				jogo.iniciar_encontro()
+				abrir_encontro()
 				jogo.responder(jogo.batalha.pergunta.correta)
 				await esperar()
 				jogo.continuar()
@@ -107,7 +113,8 @@ func executar() -> void:
 	verificar(jogo.estado == jogo.Estado.EXPLORACAO, "Encontro usa distância nos dois eixos")
 	jogo.player.position = jogo.mundo.pontos[0] + Vector2(0, 50)
 	await create_timer(0.12).timeout
-	verificar(jogo.estado == jogo.Estado.PERGUNTA, "Aproximação vertical inicia encontro")
+	verificar(jogo.estado == jogo.Estado.EXPLORACAO, "Proximidade não inicia pergunta sem crítico")
+	abrir_encontro()
 	var pergunta_ativa: Dictionary = jogo.batalha.pergunta
 	jogo._physics_process(0.0)
 	verificar(jogo.batalha.pergunta == pergunta_ativa, "Encontro não reinicia durante pergunta")

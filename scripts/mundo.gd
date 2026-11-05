@@ -22,6 +22,11 @@ var arma = "espada"
 var porta: Sprite2D
 var atores: Node2D
 var heroi: Node2D
+var explorando = false
+var grades: Array[AStarGrid2D] = []
+const ARENAS = [Rect2(48, 158, 376, 472), Rect2(448, 158, 384, 472), Rect2(856, 158, 376, 472)]
+const PILARES = [Rect2(196, 382, 48, 40), Rect2(551, 260, 48, 40), Rect2(966, 480, 48, 40)]
+signal golpe_inimigo
 
 func _ready() -> void:
 	atores = Node2D.new()
@@ -51,6 +56,7 @@ func corpo(retangulo: Rect2, pai: Node = null) -> StaticBody2D:
 	return body
 
 func configurar(indice: int) -> void:
+	explorando = false
 	fase = indice
 	derrotados = 0
 	efeito = ""
@@ -74,15 +80,75 @@ func configurar(indice: int) -> void:
 		portoes.append(corpo(Rect2(x - 12, 344, 24, 96)))
 	for p in [Vector2(220, 422), Vector2(575, 300), Vector2(990, 520)]:
 		criar_pilar(p)
+	preparar_caminhos()
 	for i in range(3):
-		var monstro = Node2D.new()
+		var monstro = CharacterBody2D.new()
 		monstro.set_script(Monstro)
 		monstro.position = pontos[i]
 		atores.add_child(monstro)
 		monstro.configurar(ELENCOS[fase][i][0], ELENCOS[fase][i][1], fase == 2 and i == 2)
+		monstro.mundo = self
+		monstro.area = ARENAS[i]
+		monstro.indice_area = i
+		monstro.acertou_jogador.connect(func(): golpe_inimigo.emit())
 		monstros.append(monstro)
 	atualizar_portoes(0)
 	queue_redraw()
+
+func preparar_caminhos() -> void:
+	grades.clear()
+	for area in ARENAS:
+		var grade = AStarGrid2D.new()
+		grade.region = Rect2i(0, 0, int(area.size.x / 16), int(area.size.y / 16))
+		grade.cell_size = Vector2(16, 16)
+		grade.offset = area.position + Vector2(8, 8)
+		grade.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
+		grade.update()
+		for x in range(grade.region.size.x):
+			for y in range(grade.region.size.y):
+				var ponto = grade.get_point_position(Vector2i(x, y))
+				var bloqueado = not area.grow(-12).has_point(ponto)
+				for pilar in PILARES:
+					bloqueado = bloqueado or pilar.grow(14).has_point(ponto)
+				grade.set_point_solid(Vector2i(x, y), bloqueado)
+		grades.append(grade)
+
+func caminho(indice: int, inicio: Vector2, destino: Vector2) -> PackedVector2Array:
+	var grade = grades[indice]
+	var de = Vector2i((inicio - grade.offset) / 16)
+	var para = Vector2i((destino - grade.offset) / 16)
+	de = de.clamp(Vector2i.ZERO, grade.region.size - Vector2i.ONE)
+	para = para.clamp(Vector2i.ZERO, grade.region.size - Vector2i.ONE)
+	de = celula_livre(grade, de)
+	para = celula_livre(grade, para)
+	return grade.get_point_path(de, para)
+
+func celula_livre(grade: AStarGrid2D, ponto: Vector2i) -> Vector2i:
+	if not grade.is_point_solid(ponto):
+		return ponto
+	var melhor = ponto
+	var distancia = INF
+	for x in range(grade.region.size.x):
+		for y in range(grade.region.size.y):
+			var candidato = Vector2i(x, y)
+			var atual = Vector2(candidato - ponto).length_squared()
+			if atual < distancia and not grade.is_point_solid(candidato):
+				melhor = candidato
+				distancia = atual
+	return melhor
+
+func definir_exploracao(ativa: bool) -> void:
+	explorando = ativa
+	if not ativa:
+		for monstro in monstros:
+			monstro.cancelar_aviso()
+
+func _physics_process(delta: float) -> void:
+	if not explorando or not is_instance_valid(heroi):
+		return
+	for i in range(monstros.size()):
+		if i >= derrotados:
+			monstros[i].atualizar_ia(delta)
 
 func criar_pilar(p: Vector2) -> void:
 	var pilar = Node2D.new()
@@ -109,7 +175,7 @@ func _process(delta: float) -> void:
 	for i in range(monstros.size()):
 		if i < derrotados:
 			monstros[i].hide()
-		elif is_instance_valid(heroi):
+		elif is_instance_valid(heroi) and not explorando:
 			monstros[i].orientar(heroi.position)
 	porta.modulate = Color("#a7ffe2") if derrotados == 3 else Color("#8c9aaa")
 	queue_redraw()
@@ -158,7 +224,12 @@ func _draw() -> void:
 	texto(Vector2(1110, 564), "SAÍDA →" if derrotados == 3 else "DERROTE O GUARDIÃO", 13, acento)
 	if efeito != "":
 		var centro = alvo + Vector2(0, -25)
-		if efeito == "acerto":
+		if efeito == "comum":
+			draw_arc(centro, 15 + progresso * 20, -1.8, 1.8, 20, Color("#c6eeff"), 3)
+			if arma == "arco":
+				var flecha = origem.lerp(centro, progresso)
+				draw_line(flecha - (centro - origem).normalized() * 26, flecha, Color("#ffe3a4"), 3)
+		elif efeito == "acerto":
 			if arma == "arco":
 				var flecha = origem.lerp(centro, minf(progresso * 2, 1))
 				var direcao = (centro - origem).normalized()

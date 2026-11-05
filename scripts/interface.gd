@@ -3,6 +3,7 @@ extends CanvasLayer
 const VisualHeroi = preload("res://scripts/visual_heroi.gd")
 signal personagem_escolhido(personagem: int)
 signal trocar_personagem
+signal critico_solicitado
 signal arma_escolhida(arma: String)
 signal resposta_confirmada(indice: int)
 signal continuar
@@ -19,6 +20,8 @@ var feedback: Label
 var selecionada = -1
 var cor = Color("#74d9bd")
 var etapa_menu = "personagem"
+var botao_critico: Button
+var carga_label: Label
 
 func estilo(fundo: Color, borda: Color, raio: int = 12) -> StyleBoxFlat:
 	var s = StyleBoxFlat.new()
@@ -71,10 +74,23 @@ func _ready() -> void:
 	objetivo.position = Vector2(44, 69)
 	objetivo.size = Vector2(1100, 26)
 	add_child(objetivo)
-	var controles = label("WASD ou SETAS  MOVER EM QUATRO DIREÇÕES     •     Acerte para atacar. Errou? Leia a dica e tente outra vez.", 16, Color("#c6d1df"))
-	controles.position = Vector2(30, 675)
-	controles.size = Vector2(1220, 35)
+	var controles = label("WASD / SETAS: mover   •   ESPAÇO / CLIQUE: atacar   •   E: crítico   •   Fuja do círculo vermelho!", 16, Color("#c6d1df"))
+	controles.position = Vector2(30, 694)
+	controles.size = Vector2(1220, 26)
 	add_child(controles)
+	carga_label = label("CRÍTICO  0/3 golpes", 18, Color("#efbc66"))
+	carga_label.position = Vector2(35, 657)
+	carga_label.size = Vector2(600, 30)
+	add_child(carga_label)
+	botao_critico = botao("E / Golpe crítico", func(): critico_solicitado.emit())
+	botao_critico.position = Vector2(940, 640)
+	botao_critico.size = Vector2(300, 40)
+	botao_critico.focus_mode = Control.FOCUS_NONE
+	add_child(botao_critico)
+
+func combate(carga: int, total: int, ao_alcance: bool) -> void:
+	carga_label.text = "CRÍTICO PRONTO — responda para finalizar!" if carga >= total else "CRÍTICO  %d/%d golpes acertados" % [carga, total]
+	botao_critico.disabled = carga < total or not ao_alcance
 
 func atualizar(fase: int, mortos: int, vidas: int, arma: String, personagem: int = 1) -> void:
 	cor = [Color("#74d9bd"), Color("#e8b76d"), Color("#bd9cff")][fase]
@@ -133,7 +149,7 @@ func menu() -> void:
 		nome.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		coluna.add_child(nome)
 		coluna.add_child(botao("Escolher", personagem_escolhido.emit.bind(id)))
-	v.add_child(label("Depois, escolha espada ou arco. Todos os heróis têm as mesmas habilidades.\nWASD ou setas para explorar as salas • Três corações por fase", 17, Color("#a5b8ce")))
+	v.add_child(label("WASD: mover • Espaço/clique: atacar • Três acertos carregam E: crítico.\nUma pergunta certa mata o guardião. Fuja dos ataques avisados em vermelho!", 17, Color("#a5b8ce")))
 
 func menu_armas(personagem: int) -> void:
 	etapa_menu = "arma"

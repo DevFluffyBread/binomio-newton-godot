@@ -19,6 +19,7 @@ func andar(direcao: Vector2, quadros: int) -> void:
 func executar() -> void:
 	jogo = load("res://scenes/rpg.tscn").instantiate()
 	root.add_child(jogo)
+	jogo.mundo.set_physics_process(false)
 	jogo.iniciar("arco")
 	jogo.set_physics_process(false)
 	jogo.player.set_physics_process(false)
