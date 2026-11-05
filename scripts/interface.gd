@@ -212,5 +212,5 @@ func vitoria() -> void:
 	var v = cartao(Vector2(250, 160), 780, true)
 	v.add_child(label("AS RUÍNAS ESTÃO LIVRES", 36, Color("#efbc66")))
 	v.add_child(label("9 guardiões derrotados  /  3 fases concluídas", 23, cor))
-	v.add_child(label("Você dominou coeficientes, termos e expansões até o grau 4. O verdadeiro golpe crítico foi aprender com cada tentativa.", 25))
+	v.add_child(label("Você praticou conceitos, coeficientes e expansões até o grau 3. Continue aprendendo com cada tentativa!", 25))
 	v.add_child(botao("Jogar novamente / escolher personagem", func(): voltar_menu.emit()))

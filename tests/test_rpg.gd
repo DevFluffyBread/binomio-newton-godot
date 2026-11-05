@@ -12,7 +12,12 @@ func verificar(condicao: bool, mensagem: String) -> void:
 		push_error(mensagem)
 
 func esperar() -> void:
-	await create_timer(0.08).timeout
+	for i in range(120):
+		await process_frame
+		if jogo.estado != jogo.Estado.ANIMACAO:
+			await process_frame
+			return
+	verificar(false, "Animação conclui dentro do limite de quadros")
 
 func expansao(b: int, n: int) -> Array[int]:
 	# Multiplicação polinomial independente do banco de alternativas.
@@ -35,13 +40,10 @@ func executar() -> void:
 	verificar(jogo.estado == jogo.Estado.MENU, "Menu inicial")
 	verificar(jogo.perguntas.size() == 9, "Nove perguntas")
 	verificar(expansao(1, 2) == [1, 2, 1], "Coeficientes grau 2")
-	verificar(expansao(3, 2) == [1, 6, 9], "Expansão (x+3)²")
+	verificar(expansao(2, 2) == [1, 4, 4], "Expansão (x+2)²")
 	verificar(expansao(1, 3) == [1, 3, 3, 1], "Coeficientes grau 3")
 	verificar(expansao(2, 3)[1] == 6, "Termo x² em (x+2)³")
-	verificar(expansao(-1, 3) == [1, -3, 3, -1], "Expansão (x-1)³")
-	verificar(expansao(1, 4) == [1, 4, 6, 4, 1], "Coeficientes grau 4")
-	verificar(expansao(-2, 4)[2] == 24, "Termo x² em (x-2)⁴")
-	verificar(expansao(-1, 4) == [1, -4, 6, -4, 1], "Expansão (x-1)⁴")
+	verificar(expansao(-1, 2) == [1, -2, 1], "Expansão (x-1)²")
 	for p in jogo.perguntas:
 		verificar(p.opcoes.size() == 4 and p.correta in range(4), "Formato de pergunta")
 		verificar(p.dica != "" and p.explicacao != "", "Dica e explicação")

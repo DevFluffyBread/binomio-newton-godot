@@ -21,9 +21,9 @@ Importe `project.godot` no Godot 4.7 ou superior e pressione **F5**. A cena prin
 
 | Fase | Tema | Conteúdo |
 | --- | --- | --- |
-| 1 | Ruínas de jade | A, B, expoente, coeficientes e expansão de grau 2 |
-| 2 | Templo de bronze | Coeficientes e termos de grau 3, incluindo sinal negativo |
-| 3 | Câmara violeta | Grau 4, sinais e o Rei do Binômio |
+| 1 | Ruínas de jade | O que é binômio, significado do expoente e identificação de A, B e n |
+| 2 | Templo de bronze | Coeficiente numérico e exemplos guiados de quadrados da soma e da diferença |
+| 3 | Câmara violeta | Coeficientes do cubo, completar um termo e desenvolver (x + 1)³ |
 
 As nove perguntas são fixas. Não existe cronômetro; não há dano por contato, combate manual, inventário ou salvamento permanente. Cada chefe também é derrotado com uma resposta correta.
 
@@ -63,3 +63,7 @@ Use branches próprias e versione cenas, scripts, imagens, `.import` e `.uid`. N
 A campanha usa salas vistas de cima, ordenação visual pela posição dos pés e janela de 1920×1080 com espaço lógico de 1280×720. Os heróis mantêm as animações laterais fornecidas pelo pack, inclusive ao caminhar verticalmente; novas folhas de frente/costas poderão substituir essa representação. Os monstros já usam frente, costas, esquerda e direita. O protótipo lateral antigo permanece em fase_01.tscn.
 
 A suíte de exploração espera EXPLORATION_TEST_RESULT: 0 falhas e verifica quatro direções, diagonal, paredes, pilares, bloqueio das áreas, abertura e retorno pelos portões, reinício e orientação dos monstros.
+
+## Conteúdo para o ensino médio
+
+Nove perguntas em progressão introdutória, combinando teoria e aplicação. As primeiras trabalham vocabulário e identificação; as seguintes usam números pequenos e as fórmulas dos graus 2 e 3. Dicas explicam o próximo passo e cada acerto apresenta uma resolução curta. Os distratores abordam erros comuns, como esquecer o termo do meio ou trocar o sinal do quadrado da diferença. Não é necessário calcular combinações, fatoriais ou expansões de grau 4.
