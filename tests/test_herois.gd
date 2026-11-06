@@ -32,6 +32,7 @@ func abrir_encontro() -> void:
 func executar() -> void:
 	jogo = load("res://scenes/rpg.tscn").instantiate()
 	root.add_child(jogo)
+	jogo.cenas_ativas = false
 	jogo.mundo.set_physics_process(false)
 	jogo.duracao_ataque = 0.05
 	await process_frame

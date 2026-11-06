@@ -20,9 +20,20 @@ window/size/viewport_width=1280
 window/size/viewport_height=720
 window/size/window_width_override=1920
 window/size/window_height_override=1080
-window/stretch/mode="canvas_items"
+window/stretch/mode="viewport"
+window/stretch/aspect="keep"
+window/handheld/orientation=0
 
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.12, 0.16, 0.22, 1)
+
+[audio]
+
+general/default_playback_type.web=1
+
+[input_devices]
+
+pointing/emulate_mouse_from_touch=true
+pointing/emulate_touch_from_mouse=false

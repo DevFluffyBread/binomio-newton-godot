@@ -28,6 +28,7 @@ func ia(monstro, quadros: int) -> void:
 func executar() -> void:
 	jogo = load("res://scenes/rpg.tscn").instantiate()
 	root.add_child(jogo)
+	jogo.cenas_ativas = false
 	jogo.iniciar("espada")
 	jogo.set_physics_process(false)
 	jogo.player.set_physics_process(false)
@@ -145,7 +146,7 @@ func executar() -> void:
 	jogo.menu()
 	jogo.iniciar("espada")
 	var perguntas = 0
-	for fase in range(3):
+	for fase in range(2):
 		for area in range(3):
 			monstro = jogo.mundo.monstros[area]
 			jogo.player.position = monstro.position + Vector2(0, 60)
@@ -163,6 +164,6 @@ func executar() -> void:
 			jogo.continuar()
 		jogo.player.position = jogo.mundo.SAIDA
 		jogo._physics_process(0.02)
-	verificar(perguntas == 9 and jogo.estado == jogo.Estado.VITORIA, "Campanha exige nove críticos respondidos")
+	verificar(perguntas == 6 and jogo.fase == 2, "Seis críticos comuns levam ao chefe")
 	print("COMBAT_TEST_RESULT: %d falhas" % falhas)
 	quit(0 if falhas == 0 else 1)

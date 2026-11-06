@@ -1,76 +1,94 @@
-# As Ruínas do Binômio
+# Ruínas do Binômio
 
-RPG educativo com visão de cima em Godot 4: escolha um dos três heróis, equipe espada ou arco e derrote nove guardiões respondendo perguntas sobre o Binômio de Newton.
+RPG educativo em Godot 4, com visão de cima, três personagens e duas armas. A campanha tem seis guardiões comuns e um chefe com três perguntas: nove perguntas fixas, sem limite de tempo, voltadas ao ensino médio.
 
 ## Executar
 
-Importe `project.godot` no Godot 4.7 ou superior e pressione **F5**. A cena principal é `scenes/rpg.tscn`. A cena `fase_01.tscn` e os scripts originais continuam disponíveis como protótipo anterior.
+Importe project.godot no Godot 4.7 ou superior e pressione F5. Cena principal: scenes/rpg.tscn. F8 interrompe uma execução anterior. Janela 1920×1080, espaço lógico fixo 1280×720, escalado proporcionalmente com barras quando necessário. O protótipo lateral anterior continua em scenes/fase_01.tscn; o script da pirâmide está preservado e inativo na campanha.
 
 ## Como jogar
 
-- Primeiro escolha Violeta, Prata ou Azul, com prévias animadas. Depois escolha espada ou arco. Use Voltar para trocar o personagem antes de começar. As escolhas são preservadas ao reiniciar ou mudar de fase.
-- WASD ou setas movem em quatro direções. O movimento diagonal tem a mesma velocidade. Não há gravidade ou pulo na campanha.
-- Explore as três salas de cada região. Ataque com Espaço ou clique; três golpes acertados carregam o crítico. Use E ou o botão do HUD, ao alcance do guardião, para abrir a pergunta.
-- Acertar a pergunta causa golpe crítico e mata o guardião. Golpes comuns interrompem e afastam o inimigo, mas nunca o matam: cada área exige pelo menos uma pergunta correta. Leia a explicação e clique em Continuar.
-- Errar custa um coração e revela uma dica. A alternativa errada fica desabilitada.
-- Cada fase começa com três corações. Ao zerar, reinicie a mesma fase ou volte ao menu para trocar a arma.
-- Cada vitória abre fisicamente o portão da próxima sala. As salas anteriores continuam acessíveis. Depois do terceiro monstro, atravesse a saída à direita para mudar de região. A última saída conclui a aventura.
-- Os inimigos patrulham a própria sala e perseguem o jogador dentro dela, contornando pilares. Não atravessam para outra área, mesmo com o portão aberto. Um círculo vermelho avisa o ataque por 0,7 segundo: saia dele para evitar perder um coração. Após dano, há 1,2 segundo de invulnerabilidade.
+- Menu inicial: Iniciar aventura, Tutorial, Opções e Créditos. Escolha Violeta, Prata ou Azul, depois espada ou arco.
+- Fases 1 e 2: WASD/setas para andar; Espaço/clique para atacar; três acertos carregam o crítico. Aperte E ao alcance do guardião para responder à pergunta e derrotá-lo.
+- Erros custam um coração, mostram dicas e desativam a alternativa escolhida. Golpes comuns não matam guardiões.
+- Inimigos perseguem somente dentro da própria sala. O círculo vermelho avisa o ataque; fuja antes do impacto. Há três corações por fase e invulnerabilidade breve após dano.
+- Cada fase comum tem três salas e três guardiões. Derrotá-los abre os portões; a saída à direita leva à próxima fase.
+- A câmera acompanha o jogador com zoom 2× nas fases comuns e é limitada às bordas físicas do mapa, inclusive durante a suavização. Perguntas congelam o enquadramento; o HUD permanece fixo.
+- Não há nomes, placas, textos de estado ou instruções fixas desenhadas no cenário; HUD e efeitos temporários de combate permanecem. Há oito detalhes decorativos por sala, sem novas colisões: duas tochas, duas raízes, duas ossadas, uma pedra e uma marca rúnica. Pilares continuam sólidos; rotas de navegação permanecem intactas.
 
-## Campanha
+## Controles em telas de toque
 
-| Fase | Tema | Conteúdo |
-| --- | --- | --- |
-| 1 | Ruínas de jade | O que é binômio, significado do expoente e identificação de A, B e n |
-| 2 | Templo de bronze | Coeficiente numérico e exemplos guiados de quadrados da soma e da diferença |
-| 3 | Câmara violeta | Coeficientes do cubo, completar um termo e desenvolver (x + 1)³ |
+Joystick à esquerda para mover; botão de ataque à direita (pode manter pressionado); círculo pequeno com estrela próximo ao joystick para o crítico. Toques simultâneos são independentes. Soltar o dedo, perder foco ou abrir um painel limpa o movimento. Toques não geram ataques duplicados por emulação de mouse.
 
-As nove perguntas são fixas. As perguntas não têm cronômetro. Não há inventário nem salvamento permanente. Durante perguntas e resultados, a perseguição e os ataques inimigos ficam pausados. Cada chefe também é derrotado com uma resposta correta.
+Os controles são detectados automaticamente em dispositivos com toque. No PC, é possível visualizar a interface adaptada executando `RuinasDoBinomio.exe -- --touch`. Teclado e mouse continuam disponíveis.
 
-## Estrutura
+A interface móvel amplia textos e alvos, reorganiza alternativas, oferece rolagem nos painéis e preserva o jogador à esquerda nas perguntas do chefe. No modo retrato, uma tela pede para girar o celular e pausa o jogo. O áudio Web aguarda o primeiro gesto do usuário e usa reprodução Stream para manter os sons gerados. Volume e trilha do chefe continuam independentes.
 
-- `scripts/jogo.gd`: campanha, estados, progressão e efeitos de ataque.
-- `scripts/batalha.gd`: pergunta ativa, alternativas erradas e bloqueio de respostas duplicadas.
-- `scripts/perguntas.gd`: nove perguntas com resposta, dica e explicação.
-- `scripts/interface.gd`: menu, HUD, alternativas e telas de resultado.
-- `scripts/mundo.gd`: cenário, plataformas e distribuição dos monstros.
-- `scripts/monstro.gd`: sprites laterais e animações dos seis tipos de inimigos.
-- `scripts/heroi.gd`: movimento em quatro direções, animações e colisão nos pés.
-- `scripts/visual_heroi.gd`: quadros e prévias dos três personagens com as duas armas.
-- `scripts/piramide.gd`: lógica anterior preservada, inativa na campanha.
+A adaptação foi validada com eventos de toque simulados e capturas; o teste em aparelho real e a publicação Web ainda estão pendentes. GitHub Pages não foi configurado.
 
-Jogadores animados dos packs Tiny Pixel Hero da CraftPix: parado, corrida, pulo, ataque, dano e morte, nas seis combinações de personagem e arma. Quadros de 42×42 pixels recortados no Godot; escala inteira, filtro nearest e colisão de corpo independente do alcance da arma. O personagem original continua no protótipo anterior. Porta original preservada. Monstros animados dos packs Slime Mobs e Predator Plant da CraftPix substituem os desenhos provisórios. As seis variantes acompanham a posição do herói com suas quatro direções, com idle, caminhada, ataque, dano e morte. O chefe é uma planta maior com coroa; veja `assets/monstros/CREDITOS.md`. Ruínas e efeitos continuam desenhados por código. Sons sintetizados em execução. Veja `assets/herois/CREDITOS.md` para a origem e a licença da arte.
+## Fase 3: chefe das profundezas
 
-## Validar
+Arena exclusiva com visão geral nos ataques, close do jogador nas perguntas, centro livre, quatro tochas e quatro marcas periféricas. A fase começa com três corações, mantendo herói e arma.
 
-Execute com o Godot instalado:
+Apresentação: fade para preto de 0,6 s, frase “Algo ressurgiu das profundezas.” por 2 s, dissolução de 0,4 s, título subindo até o centro em 1,4 s. Nesse instante começa o surgimento de 2 s e o mapa clareia. O título continua subindo, permanece 0,8 s e dissolve em 0,4 s. Nome provisório configurável em scripts/combate_chefe.gd (NOME).
 
-```sh
-godot --headless --path . --script res://tests/test_rpg.gd
-godot --headless --path . --script res://tests/test_herois.gd
-godot --headless --path . --script res://tests/test_monstros.gd
-godot --headless --path . --script res://tests/test_exploracao.gd
-godot --headless --path . --script res://tests/test_combate.gd
-```
+A batalha começa automaticamente e tem três etapas: mão esquerda, mão direita e olho central. No quadro 7, o ataque pausa e a câmera aproxima até 3× em 0,45 s, enquadrando o jogador à esquerda. A pergunta aparece no painel direito (620,120; largura 620), com quatro opções em coluna. A confirmação exige escolha e término da aproximação. Não há cronômetro. Após confirmar, o painel some e a câmera volta à visão geral em 0,45 s antes de retomar o ataque. A resolução ocorre no impacto do quadro 12. As explicações das mãos permanecem à direita, em visão geral. Respostas duplicadas são bloqueadas.
 
-A suíte verifica armas, respostas, bloqueio de cliques repetidos, dicas, derrota, reinício, portas, campanha completa e colisões. Os resultados esperados são `RPG_TEST_RESULT: 0 falhas` e `HERO_TEST_RESULT: 0 falhas`. A suíte de monstros espera `MONSTER_TEST_RESULT: 0 falhas` e confere os nove encontros, as seis variantes, ataque, dano, morte, direção lateral e reinício. A segunda suíte cobre as seis combinações, ordem da seleção, botão Voltar, animações, colisão, morte e preservação das escolhas.
+- Acerto nas mãos: esquiva e contra-ataque automáticos, específicos da arma; olho neutralizado permanece fechado. Explicação e Continuar levam à próxima etapa.
+- Erro nas mãos: perde um coração; mesma pergunta com dica e alternativa errada desativada. A outra mão já neutralizada permanece assim enquanto houver vidas.
+- Após ambas as mãos: o corpo sobe e prepara fogo roxo. O aviso informa que o erro será fatal. No impacto, a onda sai do olho em direção ao alvo. Acertar provoca esquiva e golpe fatal; errar mata mesmo com três corações.
+- A morte do chefe dura 4 s, com tremor, expressões matemáticas, explosão local e desaparecimento. Não há flash adicional de tela inteira. Após a morte começa o encerramento; a vitória abre depois dele, incluindo a explicação da última pergunta.
+- Tentar novamente restaura três corações, as duas mãos e as alternativas, mantém arma/herói e pula a apresentação. Menu principal exige confirmação e avisa que uma nova aventura recomeça do início da ruína.
 
-## Colaboração e créditos
+Não há carregamento manual de crítico ou combate livre na arena do chefe. As perguntas controlam a esquiva, o dano e o contra-ataque.
 
-Use branches próprias e versione cenas, scripts, imagens, `.import` e `.uid`. Não versione o cache `.godot/`. Os novos heróis e monstros são da CraftPix e seguem a licença do fornecedor, documentada em `assets/herois/CREDITOS.md` e `assets/monstros/CREDITOS.md`. A autoria e licença das imagens originais do protótipo ainda precisam ser confirmadas.
+## Encerramento
 
-## Perspectiva e arte
+Depois da animação completa de morte do chefe, o pacote encerramento_pixelorama toca uma vez: 144 quadros a 12 fps, 12 s, ampliação 4× e filtro nearest. Entre 6 e 8 s, um visual do personagem e arma escolhidos caminha para fora da entrada e permanece na frente das portas antes de fecharem. Textos ficam separados da arte e abaixo do personagem, na faixa reservada.
 
-A campanha usa salas vistas de cima, ordenação visual pela posição dos pés e janela de 1920×1080 com espaço lógico de 1280×720. Os heróis mantêm as animações laterais fornecidas pelo pack, inclusive ao caminhar verticalmente; novas folhas de frente/costas poderão substituir essa representação. Os monstros já usam frente, costas, esquerda e direita. O protótipo lateral antigo permanece em fase_01.tscn.
+Há uma transição de entrada de 0,4 s e um título final de 1,2 s; a vitória vem em seguida, mantendo o último quadro ao fundo e a explicação da pergunta final. Pular encerramento leva diretamente a esse quadro e à vitória. Menu e nova fase cancelam callbacks e animações antigos. O controle está em scripts/encerramento.gd; cenas_ativas=false pula a cena para as suítes de regras.
 
-A suíte de exploração espera EXPLORATION_TEST_RESULT: 0 falhas e verifica quatro direções, diagonal, paredes, pilares, bloqueio das áreas, abertura e retorno pelos portões, reinício e orientação dos monstros.
+A música do chefe desaparece suavemente; a trilha comum retorna em volume mais baixo durante o encerramento e a vitória. Menu ou nova fase restauram o volume habitual, respeitando as opções e o silêncio.
 
-## Conteúdo para o ensino médio
+## História inicial
 
-Nove perguntas em progressão introdutória, combinando teoria e aplicação. As primeiras trabalham vocabulário e identificação; as seguintes usam números pequenos e as fórmulas dos graus 2 e 3. Dicas explicam o próximo passo e cada acerto apresenta uma resolução curta. Os distratores abordam erros comuns, como esquecer o termo do meio ou trocar o sinal do quadrado da diferença. Não é necessário calcular combinações, fatoriais ou expansões de grau 4.
+Depois de escolher personagem e arma, uma nova aventura começa com três legendas automáticas sobre a entrada da ruína. Cada uma dura 4 segundos, incluindo entrada e saída suaves. As duas primeiras legendas usam as imagens 01_selos e 02_despertar. A terceira usa a abertura das portas (48 quadros a 12 fps, sem loop, 4 s). Os PNGs nativos 320×180 são ampliados 4× com filtro nearest, sob o texto e painel escuro translúcido. Artes e legendas têm fades suaves; não há narração por voz. Pular introdução está disponível desde o início. História e combate são mutuamente exclusivos. Ao concluir ou pular, a câmera normal é restaurada e o presságio da fase 1 começa. Reinícios não repetem a história; uma nova aventura repete. Controle separado em scripts/introducao.gd.
 
-## Combate em tempo real
+## Presságios, áudio e opções
 
-Espada: alcance de 76 pixels lógicos. Arco: alcance de 200 pixels, bloqueado por paredes e pilares. Ambos carregam o crítico com três acertos; a recarga do golpe comum é 0,45 segundo. Não há crítico automático por proximidade. Um erro na pergunta tira um coração e mantém a mesma pergunta disponível, com dica e alternativa errada desabilitada. O crítico é consumido ao derrotar o guardião; a próxima área começa com carga zero.
+No início da fase 1: “Você ouve barulhos estranhos…”. Na fase 2: “Você sente uma presença desconcertante…”. Cada cena dura 3 s e ocorre uma vez por campanha; reiniciar a fase não repete o aviso.
 
-As rotas dos inimigos usam AStarGrid2D, colisão física e limites da própria sala. Perguntas pausam a simulação de combate; a animação do ataque continua visível. O teste test_combate.gd verifica perseguição, confinamento, esquiva, invulnerabilidade, recarga, alcance, paredes, carregamento e a exigência de uma pergunta em cada uma das nove áreas. Resultado esperado: COMBAT_TEST_RESULT: 0 falhas.
+A música comum começa no menu e repete automaticamente nas ruínas. Ao completar o fade para preto da fase 3, a gravação fornecida (musica_chefe.mp3) substitui a trilha comum e toca em loop durante apresentação e batalha. Reiniciar o chefe não reinicia a música. Voltar ao menu ou carregar uma fase comum restaura a trilha das ruínas; volume e silêncio são preservados nas trocas. Quatro variações de espada e impacto do arco têm reprodução independente. Música base -18 dB, efeitos -7 dB. A trilha do chefe recebe compensação individual de +7,7 dB, preservada pelas opções e pelo suspense. Medição dos MP3s decodificados: RMS das ruínas -16,75 dBFS e do chefe -24,47 dBFS; pico do chefe -7,78 dBFS antes do ganho. Presságios usam um som grave sintetizado e reduzem temporariamente a música. Opções ajusta música e efeitos separadamente e permite tela cheia; configurações duram pela sessão. Não há salvamento permanente.
+
+## Estrutura e arte
+
+Controle geral em scripts/jogo.gd; batalha do chefe em scripts/combate_chefe.gd; visual e marcadores em scripts/chefe_visual.gd; câmera limitada em scripts/camera_ruinas.gd. Interface e perguntas permanecem separadas do controle de combate.
+
+- Heróis e monstros: CraftPix; origens e licenças em assets/herois/CREDITOS.md e assets/monstros/CREDITOS.md. As variantes não usadas na nova campanha continuam disponíveis.
+- Cenário: DungeonTale / Dungeon Story de NullTale, copyright 2024, https://nulltale.itch.io/dungeon-story. Licença CC BY-ND 4.0 incluída em assets/dungeon_tale/Ds by NullTale.txt. Atlas original preservado.
+- Interface: Pixel UI Free de heyheythere, https://heyheythere.itch.io/pixel-ui-free, CC BY 4.0. Recursos e licença em addons/pixel_ui/. Fonte adaptada com acentos em assets/font/; símbolos matemáticos têm fonte de reserva.
+- Fundo do menu: Fort of Illusion, kit fornecido pelo usuário; licença original em assets/fort_illusion/public-license.pdf. Céu, montanhas, torres e chão se deslocam em parallax; herói Violeta corre com espada em loop à esquerda.
+- Chefe: pacote completo chefe_tetraedro_morte fornecido pelo usuário; onze animações, incluindo surgimento, mãos, olho, fogo, reações, idles e morte. Quadros 128×128, 12 fps, origem inferior preservada. Ajuste de código fixa a pausa no quadro 7 mesmo em quadros de processamento longos; pixels não foram regenerados.
+- Áudio: origens em assets/audio/ORIGEM.txt. Autoria/licença das imagens originais do protótipo permanece a confirmar.
+
+## Validação
+
+Execute cada suíte com `godot --headless --path . --script res://tests/NOME.gd`:
+
+- test_rpg: matemática, perguntas, dicas, cliques repetidos, vida, reinício e progressão das duas fases comuns para a arena.
+- test_herois: seis combinações, escolhas, animações e colisões.
+- test_monstros: variantes dos seis guardiões, animações, direção e reinício.
+- test_exploracao: quatro direções, diagonal, paredes, pilares e portões.
+- test_combate: perseguição, confinamento, esquiva, invulnerabilidade, alcance e exigência de seis críticos comuns.
+- test_menu: navegação, parallax e opções de áudio.
+- test_toque: joystick, dois dedos, ataque/crítico, limpeza dos controles e painéis móveis.
+- test_encerramento: seis combinações, saída do herói, último quadro, vitória, pular, cancelamento e transição musical com volume zero.
+- test_midias: duas imagens, animação das portas, recortes, música sincronizada com tela preta, loop, reinício, restauração e silêncio.
+- test_enquadramento: história completa e pulo, nova campanha, cancelamentos, bloqueio de resposta durante zoom, jogador à esquerda, alternativas e dicas no painel direito e visão geral antes do impacto.
+- test_chefe: seis combinações; pausa no quadro 7; erros e dicas nas duas mãos; erro final fatal; três falhas; restauração; morte e vitória; câmera nos cantos; presságios e cancelamento de cenas.
+
+Todos devem terminar com 0 falhas. As suítes comuns desativam cenas de apresentação para isolar as regras; test_chefe e a revisão renderizada exercitam as transições.
+
+## Exportar Windows
+
+Modelo Windows Desktop em export_presets.cfg: Windows x86_64 com pacote incorporado ao executável. Exemplo: godot --headless --path . --export-release "Windows Desktop" build/windows/RuinasDoBinomio.exe. As exportações ficam fora do versionamento; não incluir .godot ou credenciais em commits.

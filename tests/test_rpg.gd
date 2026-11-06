@@ -40,6 +40,7 @@ func abrir_encontro() -> void:
 func executar() -> void:
 	jogo = load("res://scenes/rpg.tscn").instantiate()
 	root.add_child(jogo)
+	jogo.cenas_ativas = false
 	jogo.mundo.set_physics_process(false)
 	jogo.duracao_ataque = 0.01
 	await process_frame
@@ -91,7 +92,7 @@ func executar() -> void:
 		# Campanha completa pelas portas.
 		jogo.menu()
 		jogo.iniciar(arma)
-		for fase in range(3):
+		for fase in range(2):
 			verificar(jogo.fase == fase and jogo.vidas == 3, "Vida cheia em cada fase")
 			verificar(is_instance_valid(jogo.barreira), "Porta/progresso bloqueados por guardião")
 			for monstro in range(3):
@@ -103,7 +104,7 @@ func executar() -> void:
 			verificar(jogo.barreira == null, "Caminho liberado")
 			jogo.player.position = jogo.mundo.SAIDA
 			jogo._physics_process(0.0)
-		verificar(jogo.estado == jogo.Estado.VITORIA, "Vitória após nove monstros")
+		verificar(jogo.fase == 2 and jogo.mundo.monstros.is_empty(), "Seis guardiões levam à arena exclusiva")
 		jogo.menu()
 		verificar(jogo.estado == jogo.Estado.MENU, "Retorno ao menu")
 	# Aproximar no eixo horizontal sem estar perto no mapa não inicia batalha.

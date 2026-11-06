@@ -1,0 +1,1 @@
+Animação fornecida pelo usuário no pacote encerramento_pixelorama. Originais preservados: 144 quadros, 320×180, 12 fps, sem loop. Saída do herói, textos, título e transições são adicionados pelo código do jogo.

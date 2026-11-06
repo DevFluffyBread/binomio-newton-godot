@@ -1,0 +1,12 @@
+Áudios fornecidos pelo usuário para este projeto.
+
+musica_fundo.mp3: musiquinhas.mp3
+impacto_arco.mp3: 521552__omerbhatti34__arrow-impact.mp3 (omerbhatti34, conforme nome do arquivo)
+espada_10.wav: 209086__lukesharples__sword-swipe10.wav
+espada_6.wav: 209126__lukesharples__sword-swipe6.wav
+espada_9.wav: 209083__lukesharples__sword-swipe9.wav
+espada_7.wav: 209118__lukesharples__sword-swipe7.wav
+Sons de espada: lukesharples, conforme nomes dos arquivos.
+
+Os arquivos recebidos não incluem documentação de licença.
+musica_chefe.mp3: Gravando-2026-11-05-230731.mp3, fornecida pelo usuário para a entrada e batalha do chefe.

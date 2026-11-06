@@ -5,6 +5,7 @@ signal critico_solicitado
 const Visual = preload("res://scripts/visual_heroi.gd")
 const VELOCIDADE = 240.0
 
+var entrada_toque = Vector2.ZERO
 var pode_mover = false
 
 var arma = "espada"
@@ -59,7 +60,7 @@ func vetor_entrada() -> Vector2:
 		direcao.y -= 1
 	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
 		direcao.y += 1
-	return direcao.normalized()
+	return (direcao.normalized() + entrada_toque).limit_length(1.0)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not pode_mover:
@@ -72,6 +73,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			critico_solicitado.emit()
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.device == -1 and preload("res://scripts/dispositivo.gd").ativo(): return
 		ataque_solicitado.emit()
 		get_viewport().set_input_as_handled()
 

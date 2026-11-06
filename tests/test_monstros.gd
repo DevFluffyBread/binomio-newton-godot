@@ -19,11 +19,12 @@ func abrir_encontro() -> void:
 func executar() -> void:
 	jogo = load("res://scenes/rpg.tscn").instantiate()
 	root.add_child(jogo)
+	jogo.cenas_ativas = false
 	jogo.mundo.set_physics_process(false)
 	jogo.duracao_ataque = 0.16
 	jogo.iniciar("espada")
 	var encontrados: Dictionary = {}
-	for fase in range(3):
+	for fase in range(2):
 		jogo.carregar_fase(fase)
 		verificar(jogo.mundo.monstros.size() == 3, "Três monstros por fase")
 		for i in range(3):
@@ -59,6 +60,6 @@ func executar() -> void:
 		verificar(jogo.mundo.monstros.size() == 3, "Reinício não acumula monstros")
 		for monstro in jogo.mundo.monstros:
 			verificar(monstro.visible and monstro.estado == "parado", "Reinício restaura monstros vivos")
-	verificar(encontrados.size() == 6, "Seis variações dos dois packs usadas")
+	verificar(encontrados.size() == 5, "Cinco variações nos seis encontros comuns")
 	print("MONSTER_TEST_RESULT: %d falhas" % falhas)
 	quit(0 if falhas == 0 else 1)

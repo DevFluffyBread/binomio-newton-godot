@@ -1,6 +1,8 @@
 extends Node2D
 
+const Cenario = preload("res://scripts/cenario_dungeon.gd")
 const Monstro = preload("res://scripts/monstro.gd")
+const PelePixel = preload("res://scripts/pele_pixel.gd")
 const PALETAS = [Color("#74d9bd"), Color("#e8b76d"), Color("#bd9cff")]
 const NOMES = [["Slime de jade", "Slime rubi", "Broto faminto"], ["Slime abissal", "Mandíbula dourada", "Trepadeira sentinela"], ["Slime ancestral", "Flor sombria", "REI DO BINÔMIO"]]
 const ELENCOS = [[["Slime", 1], ["Slime", 2], ["Plant", 1]], [["Slime", 3], ["Plant", 2], ["Plant", 1]], [["Slime", 2], ["Plant", 3], ["Plant", 3]]]
@@ -29,6 +31,7 @@ const PILARES = [Rect2(196, 382, 48, 40), Rect2(551, 260, 48, 40), Rect2(966, 48
 signal golpe_inimigo
 
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	atores = Node2D.new()
 	atores.y_sort_enabled = true
 	add_child(atores)
@@ -70,6 +73,15 @@ func configurar(indice: int) -> void:
 			remove_child(filho)
 			filho.queue_free()
 	portoes.clear()
+	if fase == 2:
+		paredes = [Rect2(24, 134, 1232, 24), Rect2(24, 630, 1232, 24), Rect2(24, 134, 24, 520), Rect2(1232, 134, 24, 520)]
+		for r in paredes:
+			corpo(r)
+		porta.hide()
+		grades.clear()
+		queue_redraw()
+		return
+	porta.show()
 	paredes = [Rect2(24, 134, 1232, 24), Rect2(24, 630, 1232, 24), Rect2(24, 134, 24, 520), Rect2(1232, 134, 24, 210), Rect2(1232, 440, 24, 214)]
 	for x in [424, 832]:
 		paredes.append(Rect2(x, 142, 24, 202))
@@ -155,13 +167,7 @@ func criar_pilar(p: Vector2) -> void:
 	pilar.position = p
 	atores.add_child(pilar)
 	corpo(Rect2(-24, -40, 48, 40), pilar)
-	pilar.draw.connect(func():
-		pilar.draw_rect(Rect2(-30, -44, 60, 48), Color("#101a26"))
-		pilar.draw_rect(Rect2(-24, -56, 48, 52), Color("#465467"))
-		pilar.draw_rect(Rect2(-29, -65, 58, 17), Color("#657589"))
-		pilar.draw_line(Vector2(-17, -43), Vector2(-17, -10), Color("#8995a2"), 3)
-		pilar.draw_line(Vector2(15, -43), Vector2(15, -10), Color("#29384b"), 4)
-	)
+	pilar.draw.connect(func(): Cenario.pilar(pilar))
 	decoracoes.append(pilar)
 
 func atualizar_portoes(total: int) -> void:
@@ -184,44 +190,27 @@ func animar_resposta(indice: int, acertou: bool, duracao: float) -> void:
 	monstros[indice].reagir(acertou, duracao)
 
 func texto(pos: Vector2, valor: String, tamanho: int, cor: Color) -> void:
-	draw_string(ThemeDB.fallback_font, pos, valor, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho, cor)
+	draw_string(PelePixel.tema().default_font, pos, valor, HORIZONTAL_ALIGNMENT_LEFT, -1, PelePixel.tamanho(tamanho), cor)
 
 func _draw() -> void:
 	var acento: Color = PALETAS[fase]
-	draw_rect(Rect2(0, 0, 1280, 720), Color("#0d1522"))
-	draw_rect(Rect2(48, 158, 1184, 472), Color("#222f3b"))
-	for x in range(48, 1232, 40):
-		for y in range(158, 630, 40):
-			var cor = Color("#263541") if (x / 40 + y / 40) % 2 == 0 else Color("#23313e")
-			draw_rect(Rect2(x + 1, y + 1, 38, 38), cor)
-	for i in range(3):
-		var x = 70 + i * 408
-		texto(Vector2(x, 193), ["PÁTIO DAS RUNAS", "GALERIA DOS GUARDIÕES", "CÂMARA DO SELO"][i], 16, acento if i <= derrotados else Color("#78889a"))
-		texto(Vector2(x, 216), "ÁREA %d / %s" % [i + 1, "LIBERADA" if i <= derrotados else "SELADA"], 12, Color("#9aaebf"))
-		draw_arc(pontos[i], 42 if i < 2 else 55, 0, TAU, 40, Color(acento, 0.2), 2)
-		if i < derrotados:
-			texto(pontos[i] + Vector2(-24, 6), "LIVRE", 13, acento)
+	if fase == 2:
+		Cenario.chao_arena(self)
+		Cenario.detalhes(self, tempo, true)
+		for r in paredes:
+			Cenario.parede(self, r)
+		if efeito != "": desenhar_efeito()
+		return
+	Cenario.chao(self)
+	Cenario.detalhes(self, tempo)
 	for r in paredes:
-		draw_rect(r.grow(3), Color("#111d2a"))
-		draw_rect(r, Color("#455466"))
-		draw_line(r.position, Vector2(r.end.x, r.position.y), Color("#6d7e90"), 3)
+		Cenario.parede(self, r)
 	for i in range(portoes.size()):
 		var x = portoes[i].position.x
-		if i < derrotados:
-			draw_rect(Rect2(x - 12, 344, 24, 96), Color(acento, 0.15))
-			draw_line(Vector2(x - 12, 345), Vector2(x + 12, 345), acento, 4)
-			draw_line(Vector2(x - 12, 439), Vector2(x + 12, 439), acento, 4)
-		else:
-			draw_rect(Rect2(x - 12, 344, 24, 96), Color("#17212e"))
-			for y in range(352, 438, 16):
-				draw_line(Vector2(x - 12, y), Vector2(x + 12, y), Color("#b99b69"), 5)
-			draw_line(Vector2(x, 346), Vector2(x, 439), Color("#b99b69"), 4)
-			texto(Vector2(x - 38, 470), "ABERTO" if i < derrotados else "SELADO", 12, acento if i < derrotados else Color("#af986e"))
-	for p in [Vector2(110, 145), Vector2(490, 145), Vector2(900, 145)]:
-		draw_circle(p + Vector2(0, 12), 14 + sin(tempo * 5) * 2, Color(acento, 0.08))
-		draw_rect(Rect2(p - Vector2(5, 2), Vector2(10, 18)), Color("#c7a875"))
-		draw_circle(p + Vector2(0, -3), 5, acento)
-	texto(Vector2(1110, 564), "SAÍDA →" if derrotados == 3 else "DERROTE O GUARDIÃO", 13, acento)
+		Cenario.portao(self, x, i < derrotados)
+	if efeito != "": desenhar_efeito()
+
+func desenhar_efeito() -> void:
 	if efeito != "":
 		var centro = alvo + Vector2(0, -25)
 		if efeito == "comum":

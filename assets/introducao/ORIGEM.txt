@@ -1,0 +1,1 @@
+Introdução em pixel art fornecida pelo usuário no pacote introducao_pixelorama. PNGs nativos 320×180, portas com 48 quadros a 12 fps, sem loop. Originais preservados; textos e transições aplicados no Godot.

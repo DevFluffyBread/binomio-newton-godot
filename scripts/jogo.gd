@@ -1,12 +1,21 @@
 extends Node2D
 
-enum Estado { MENU, EXPLORACAO, PERGUNTA, ANIMACAO, RESULTADO, DERROTA, VITORIA }
+enum Estado { MENU, EXPLORACAO, PERGUNTA, ANIMACAO, RESULTADO, DERROTA, VITORIA, PRESSAGIO, APRESENTACAO, PREPARACAO, RESOLUCAO, MORTE_CHEFE, ENQUADRAMENTO, HISTORIA, ENCERRAMENTO }
+const AudioJogo = preload("res://scripts/audio_jogo.gd")
 const Perguntas = preload("res://scripts/perguntas.gd")
 const Mundo = preload("res://scripts/mundo.gd")
 const Heroi = preload("res://scripts/heroi.gd")
 const Interface = preload("res://scripts/interface.gd")
 const Batalha = preload("res://scripts/batalha.gd")
 const VisualHeroi = preload("res://scripts/visual_heroi.gd")
+var camera: Camera2D
+var controles_toque
+var encerramento
+var introducao
+var historia_pendente = false
+var chefe_batalha
+var cenas_ativas = true
+var pressagios_vistos = [false, false]
 var estado = Estado.MENU
 var fase = 0
 var mortos = 0
@@ -19,6 +28,7 @@ var mundo
 var player
 var ui
 var batalha
+var sons
 var som: AudioStreamPlayer
 var barreira: StaticBody2D
 var perguntas = Perguntas.todas()
@@ -66,22 +76,58 @@ func _ready() -> void:
 	ui.critico_solicitado.connect(tentar_critico)
 	ui.resposta_confirmada.connect(responder)
 	ui.continuar.connect(continuar)
-	ui.reiniciar.connect(func(): carregar_fase(fase))
-	ui.voltar_menu.connect(menu)
+	ui.reiniciar.connect(func(): carregar_fase(fase, false))
+	ui.voltar_menu.connect(menu_inicial)
+	sons = Node.new()
+	sons.set_script(AudioJogo)
+	add_child(sons)
+	ui.audio_alterado.connect(sons.volumes)
+	ui.audio_alterado.connect(func(_musica: float, efeitos: float): som.volume_db = linear_to_db(maxf(efeitos, 0.0001)))
 	som = AudioStreamPlayer.new()
 	add_child(som)
+	camera = Camera2D.new()
+	camera.set_script(preload("res://scripts/camera_ruinas.gd"))
+	add_child(camera)
+	chefe_batalha = Node.new()
+	chefe_batalha.set_script(preload("res://scripts/combate_chefe.gd"))
+	chefe_batalha.jogo = self
+	add_child(chefe_batalha)
+	introducao = Node.new()
+	introducao.set_script(preload("res://scripts/introducao.gd"))
+	introducao.jogo = self
+	add_child(introducao)
+	ui.pular_historia.connect(introducao.pular)
+	encerramento = CanvasLayer.new()
+	encerramento.set_script(preload("res://scripts/encerramento.gd"))
+	encerramento.jogo = self
+	add_child(encerramento)
+	controles_toque = CanvasLayer.new()
+	controles_toque.set_script(preload("res://scripts/controles_toque.gd"))
+	controles_toque.jogo = self
+	add_child(controles_toque)
 	mundo.configurar(0)
 	player.position = Mundo.ENTRADA
+	menu_inicial()
+
+func menu_inicial() -> void:
 	menu()
+	ui.inicial()
 
 func mudar_estado(novo: Estado) -> void:
 	estado = novo
+	controles_toque.definir_ativo(novo == Estado.EXPLORACAO)
 	mundo.definir_exploracao(novo == Estado.EXPLORACAO)
 	player.pode_mover = novo == Estado.EXPLORACAO
 	if not player.pode_mover:
 		player.velocity = Vector2.ZERO
 
 func menu() -> void:
+	encerramento.cancelar()
+	sons.musica_ruinas()
+	introducao.cancelar()
+	chefe_batalha.cancelar()
+	ui.hud_visivel(true)
+	camera.configurar(player, true)
 	if is_instance_valid(tween_efeito):
 		tween_efeito.kill()
 	mundo.efeito = ""
@@ -100,15 +146,21 @@ func escolher_personagem(id: int) -> void:
 func iniciar(escolha: String) -> void:
 	if estado != Estado.MENU or not escolha in ["espada", "arco"]:
 		return
+	pressagios_vistos = [false, false]
+	historia_pendente = cenas_ativas
 	arma = escolha
 	player.configurar(personagem, arma)
 	carregar_fase(0)
 
-func carregar_fase(indice: int) -> void:
+func carregar_fase(indice: int, apresentar: bool = true) -> void:
+	encerramento.cancelar()
+	introducao.cancelar()
 	if is_instance_valid(tween_efeito):
 		tween_efeito.kill()
 	geracao += 1
+	chefe_batalha.cancelar()
 	fase = indice
+	if fase < 2: sons.musica_ruinas()
 	vidas = 3
 	mortos = 0
 	carga_critico = 0
@@ -121,8 +173,43 @@ func carregar_fase(indice: int) -> void:
 	player.velocity = Vector2.ZERO
 	player.configurar(personagem, arma)
 	ui.limpar()
+	ui.hud_visivel(true)
 	ui.atualizar(fase, mortos, vidas, arma, personagem)
+	camera.configurar(player, fase == 2)
+	if fase == 2:
+		barreira = null
+		chefe_batalha.entrar(apresentar)
+		return
 	atualizar_barreira()
+	if historia_pendente and fase == 0 and cenas_ativas:
+		historia_pendente = false
+		introducao.iniciar()
+		return
+	mudar_estado(Estado.EXPLORACAO)
+	if cenas_ativas and not pressagios_vistos[fase]:
+		pressagio()
+
+func pressagio() -> void:
+	pressagios_vistos[fase] = true
+	var rodada = geracao
+	mudar_estado(Estado.PRESSAGIO)
+	ui.criar_cinema()
+	ui.cortina.color = Color(0, 0, 0, 0.78)
+	ui.frase_cinema.text = ["Você ouve barulhos estranhos…", "Você sente uma presença desconcertante…"][fase]
+	ui.frase_cinema.modulate.a = 0
+	sons.suspense(true)
+	sons.ambiente(fase)
+	var entrada = create_tween()
+	entrada.tween_property(ui.frase_cinema, "modulate:a", 1.0, 0.4)
+	await get_tree().create_timer(2.6).timeout
+	if rodada != geracao: return
+	var saida = create_tween()
+	saida.tween_property(ui.frase_cinema, "modulate:a", 0.0, 0.4)
+	await saida.finished
+	if rodada != geracao: return
+	ui.encerrar_cinema()
+	ui.hud_visivel(true)
+	sons.suspense(false)
 	mudar_estado(Estado.EXPLORACAO)
 
 func atualizar_barreira() -> void:
@@ -133,7 +220,9 @@ func _physics_process(delta: float) -> void:
 	recarga_ataque = maxf(0, recarga_ataque - delta)
 	invulneravel = maxf(0, invulneravel - delta)
 	player.modulate.a = 0.5 if invulneravel > 0 and fmod(invulneravel, 0.2) > 0.1 else 1.0
-	ui.combate(carga_critico, GOLPES_PARA_CRITICO, estado == Estado.EXPLORACAO and alvo_ao_alcance())
+	camera.congelada = estado != Estado.EXPLORACAO
+	if fase != 2 and estado not in [Estado.HISTORIA, Estado.PRESSAGIO, Estado.APRESENTACAO]:
+		ui.combate(carga_critico, GOLPES_PARA_CRITICO, estado == Estado.EXPLORACAO and alvo_ao_alcance(), estado == Estado.EXPLORACAO)
 	if estado != Estado.EXPLORACAO:
 		return
 	if mortos == 3 and player.position.distance_to(Mundo.SAIDA) < 30:
@@ -144,7 +233,7 @@ func _physics_process(delta: float) -> void:
 			ui.vitoria()
 
 func alvo_ao_alcance() -> bool:
-	if mortos >= 3 or not Mundo.ARENAS[mortos].has_point(player.position):
+	if fase == 2 or mortos >= 3 or not Mundo.ARENAS[mortos].has_point(player.position):
 		return false
 	var inimigo = mundo.monstros[mortos]
 	var alcance = 200.0 if arma == "arco" else 76.0
@@ -154,10 +243,11 @@ func alvo_ao_alcance() -> bool:
 	return get_world_2d().direct_space_state.intersect_ray(consulta).is_empty()
 
 func atacar() -> void:
-	if estado != Estado.EXPLORACAO or recarga_ataque > 0:
+	if fase == 2 or estado != Estado.EXPLORACAO or recarga_ataque > 0:
 		return
 	recarga_ataque = 0.45
 	player.animar_acao("ataque", 0.35)
+	sons.golpe(arma)
 	if not alvo_ao_alcance():
 		ui.objetivo.text = "Golpe fora de alcance. Aproxime-se do guardião da área atual."
 		return
@@ -165,7 +255,7 @@ func atacar() -> void:
 	player.orientar(inimigo.position)
 	inimigo.golpe_comum(player.position)
 	carga_critico = mini(carga_critico + 1, GOLPES_PARA_CRITICO)
-	ui.objetivo.text = "CRÍTICO PRONTO! Use E ou o botão para responder e finalizar." if carga_critico == GOLPES_PARA_CRITICO else "Acertou! Carregue o crítico: %d/%d golpes." % [carga_critico, GOLPES_PARA_CRITICO]
+	ui.objetivo.text = "Use seu crítico ao alcance do guardião para abrir o próximo portão." if carga_critico == GOLPES_PARA_CRITICO else "Acertou! Carregue o crítico: %d/%d golpes." % [carga_critico, GOLPES_PARA_CRITICO]
 	mundo.efeito = "comum"
 	mundo.arma = arma
 	mundo.alvo = inimigo.position
@@ -175,9 +265,13 @@ func atacar() -> void:
 		tween_efeito.kill()
 	tween_efeito = create_tween()
 	tween_efeito.tween_property(mundo, "progresso", 1.0, 0.3)
-	tween_efeito.tween_callback(func(): mundo.efeito = "")
+	tween_efeito.tween_callback(func():
+		sons.acertar(arma)
+		mundo.efeito = ""
+	)
 
 func tentar_critico() -> void:
+	if fase == 2: return
 	if estado != Estado.EXPLORACAO:
 		return
 	if carga_critico < GOLPES_PARA_CRITICO:
@@ -218,6 +312,9 @@ func responder(indice: int) -> void:
 func _resposta(acertou: bool) -> void:
 	if estado != Estado.PERGUNTA:
 		return
+	if fase == 2:
+		chefe_batalha.resposta(acertou)
+		return
 	mudar_estado(Estado.ANIMACAO)
 	ui.bloquear()
 	var rodada = geracao
@@ -229,9 +326,17 @@ func _resposta(acertou: bool) -> void:
 	player.orientar(mundo.monstros[mortos].position)
 	player.animar_acao("ataque" if acertou else ("morte" if vidas == 1 else "dano"), duracao_ataque)
 	mundo.animar_resposta(mortos, acertou, duracao_ataque)
-	tocar(acertou)
+	if acertou:
+		sons.golpe(arma)
+	else:
+		tocar(false)
 	var tween = create_tween()
-	tween.tween_property(mundo, "progresso", 1.0, duracao_ataque)
+	tween.tween_property(mundo, "progresso", 0.5, duracao_ataque * 0.5)
+	tween.tween_callback(func():
+		if acertou and rodada == geracao:
+			sons.acertar(arma)
+	)
+	tween.tween_property(mundo, "progresso", 1.0, duracao_ataque * 0.5)
 	await tween.finished
 	if rodada != geracao:
 		return
@@ -257,6 +362,9 @@ func _resposta(acertou: bool) -> void:
 
 func continuar() -> void:
 	if estado != Estado.RESULTADO:
+		return
+	if fase == 2:
+		chefe_batalha.preparar()
 		return
 	ui.limpar()
 	mudar_estado(Estado.EXPLORACAO)

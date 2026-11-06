@@ -1,0 +1,138 @@
+{
+  "frame_size": [
+    128,
+    128
+  ],
+  "grid": [
+    8,
+    3
+  ],
+  "origin": [
+    64,
+    128
+  ],
+  "fps": 12,
+  "animations": {
+    "surgimento": {
+      "sheet": "surgimento.png",
+      "frame_count": 24,
+      "loop": false,
+      "frame_duration_seconds": 0.08333333333333333
+    },
+    "parado": {
+      "sheet": "parado.png",
+      "frame_count": 24,
+      "loop": true,
+      "frame_duration_seconds": 0.08333333333333333
+    },
+    "ataque_mao_esquerda": {
+      "sheet": "ataque_mao_esquerda.png",
+      "frame_count": 24,
+      "loop": false,
+      "fps": 12,
+      "frame_duration_seconds": 0.08333333333333333,
+      "pause_frame": 7,
+      "impact_frame": 12,
+      "recovery_frame": 16,
+      "end_state": "parado",
+      "question_time_seconds": 0.6666666666666666,
+      "impact_time_seconds": 1.0
+    },
+    "ataque_mao_direita": {
+      "sheet": "ataque_mao_direita.png",
+      "frame_count": 24,
+      "loop": false,
+      "fps": 12,
+      "frame_duration_seconds": 0.08333333333333333,
+      "pause_frame": 7,
+      "impact_frame": 12,
+      "recovery_frame": 16,
+      "end_state": "parado_uma_mao",
+      "question_time_seconds": 0.6666666666666666,
+      "impact_time_seconds": 1.0
+    },
+    "ataque_olho": {
+      "sheet": "ataque_olho.png",
+      "frame_count": 24,
+      "loop": false,
+      "fps": 12,
+      "frame_duration_seconds": 0.08333333333333333,
+      "pause_frame": 7,
+      "impact_frame": 12,
+      "recovery_frame": 16,
+      "end_state": "parado_sem_maos",
+      "question_time_seconds": 0.6666666666666666,
+      "impact_time_seconds": 1.0,
+      "spawn_effect": "onda_fogo_roxo"
+    },
+    "dano_mao_esquerda": {
+      "sheet": "dano_mao_esquerda.png",
+      "frame_count": 12,
+      "loop": false,
+      "fps": 12,
+      "frame_duration_seconds": 0.08333333333333333
+    },
+    "dano_mao_direita": {
+      "sheet": "dano_mao_direita.png",
+      "frame_count": 12,
+      "loop": false,
+      "fps": 12,
+      "frame_duration_seconds": 0.08333333333333333
+    },
+    "parado_uma_mao": {
+      "sheet": "parado_uma_mao.png",
+      "frame_count": 24,
+      "loop": true,
+      "fps": 12,
+      "frame_duration_seconds": 0.08333333333333333
+    },
+    "parado_sem_maos": {
+      "sheet": "parado_sem_maos.png",
+      "frame_count": 24,
+      "loop": true,
+      "fps": 12,
+      "frame_duration_seconds": 0.08333333333333333
+    },
+    "onda_fogo_roxo": {
+      "sheet": "onda_fogo_roxo.png",
+      "frame_count": 24,
+      "loop": false,
+      "fps": 12,
+      "frame_duration_seconds": 0.08333333333333333,
+      "world_movement": "Godot moves the effect toward the target; no movement is baked in"
+    },
+    "morte": {
+      "sheet": "morte.png",
+      "frame_count": 48,
+      "loop": false,
+      "fps": 12,
+      "frame_duration_seconds": 0.08333333333333333,
+      "grid": [
+        8,
+        6
+      ],
+      "tremor_start_frame": 0,
+      "expressions_start_frame": 7,
+      "explosion_frame": 32,
+      "transparent_end_frame": 47,
+      "expressions": [
+        "(a+b)^2",
+        "a^2+2ab+b^2",
+        "(x+y)^3",
+        "(a+b)^n",
+        "1+2+1"
+      ]
+    }
+  },
+  "perspectiva": "frontal, para arena vista de cima",
+  "lado_das_maos": "esquerda/direita de quem olha para a tela",
+  "integration": {
+    "pause_before_question": true,
+    "frame_indices": "zero-based",
+    "effects_in_world_space": true,
+    "fire_origin_in_boss_frame": [
+      64,
+      43
+    ]
+  }
+}

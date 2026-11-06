@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="SpriteFrames" path="res://assets/chefe_tetraedro/chefe_tetraedro.tres" id="1"]
+[ext_resource type="Script" path="res://scripts/chefe_visual.gd" id="2"]
+[node name="ChefeTetraedro" type="Node2D"]
+script = ExtResource("2")
+[node name="Visual" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+sprite_frames = ExtResource("1")
+animation = &"surgimento"
+centered = false
+offset = Vector2(-64, -128)

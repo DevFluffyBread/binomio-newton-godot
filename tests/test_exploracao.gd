@@ -19,6 +19,7 @@ func andar(direcao: Vector2, quadros: int) -> void:
 func executar() -> void:
 	jogo = load("res://scenes/rpg.tscn").instantiate()
 	root.add_child(jogo)
+	jogo.cenas_ativas = false
 	jogo.mundo.set_physics_process(false)
 	jogo.iniciar("arco")
 	jogo.set_physics_process(false)
@@ -49,7 +50,7 @@ func executar() -> void:
 	jogo.player.position = Vector2(160, 400)
 	await andar(Vector2.RIGHT, 20)
 	verificar(jogo.player.position.x <= 187, "Pilar bloqueia a passagem")
-	for fase in range(3):
+	for fase in range(2):
 		jogo.carregar_fase(fase)
 		verificar(jogo.mundo.portoes.size() == 3, "Três portões por região")
 		jogo.player.position = Vector2(390, 392)

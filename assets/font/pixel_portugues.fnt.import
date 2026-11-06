@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://xvide0wtfuuq"
+path="res://.godot/imported/pixel_portugues.fnt-eead2859b348c2f3274923710b8d55e4.fontdata"
+
+[deps]
+
+source_file="res://assets/font/pixel_portugues.fnt"
+dest_files=["res://.godot/imported/pixel_portugues.fnt-eead2859b348c2f3274923710b8d55e4.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2
